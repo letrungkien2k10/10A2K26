@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lớp 10A2-K26 THPT Quế Lâm - Website chính thức</title>
+    <link rel="icon" href="logo.png" type="image/png">
+    <meta name="description" content="Trang web chính thức của lớp 10A2-K26, Trường THPT Quế Lâm. Cập nhật thông tin, hình ảnh, hoạt động và kết nối với thành viên lớp.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #7b2ff7 0%, #f107a3 100%);
+        }
+        .student-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .student-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            box-shadow: 0 16px 32px rgba(123,47,247,0.15);
+        }
+        .marquee-wrapper {
+            display: flex;
+            width: max-content;
+            animation: marquee 25s linear infinite;
+            }
+
+        .marquee {
+            display: flex;
+            }
+
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .filter-btn.active {
+            background-color: #7b2ff7;
+            color: white;
+            box-shadow: 0 4px 12px rgba(123,47,247,0.3);
+        }
+        .memory-item {
+            transition: all 0.3s ease;
+        }
+        .memory-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .bg-memory {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .upload-btn {
+            transition: all 0.3s ease;
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+        #scrollTopBtn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #9b5de5, #f15bb5);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #scrollTopBtn.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        #scrollTopBtn:hover {
+            transform: scale(1.1);
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .gallery-item img {
+            transition: transform 0.4s;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+        .gallery-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(123,47,247,0.85);
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .gallery-item:hover .gallery-caption {
+            opacity: 1;
+        }
+        body.dark {
+            background: #18181b !important;
+            color: #e5e7eb !important;
+        }
+        body.dark .bg-white, body.dark .bg-gray-50 {
+            background: #23232a !important;
+            color: #e5e7eb !important;
+        }
+        body.dark .text-gray-800, body.dark .text-gray-600 {
+            color: #e5e7eb !important;
+        }
+        body.dark .gradient-bg {
+            background: linear-gradient(135deg, #23232a 0%, #7b2ff7 100%) !important;
+        }
+        body.dark .bg-purple-600 {
+            background: #7b2ff7 !important;
+        }
+        body.dark .shadow-md, body.dark .shadow-lg {
+            box-shadow: 0 4px 24px rgba(123,47,247,0.2) !important;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .role-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .monitor-badge {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        .secretary-badge {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .group-leader-badge {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .member-badge {
+            background-color: #6b7280;
+            color: white;
+        }
+        .assistant-badge {
+            background-color: #ec4899;
+            color: white;
+        }
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .memory-card {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .memory-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .memory-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .memory-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 1rem;
+            color: white;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .memory-card:hover .memory-overlay {
+            transform: translateY(0);
+        }
+        .memory-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .memory-date {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+        .memory-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .memory-card:hover .memory-actions {
+            opacity: 1;
+        }
+        .memory-action-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255,255,255,0.9);
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .memory-action-btn:hover {
+            transform: scale(1.1);
+        }
+        .edit-btn {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-memory min-h-screen">
+    <!-- Scroll to Top Button -->
+    <div id="scrollTopBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <div class="flex items-center space-x-2">
+                    <img src="logo.png" alt="Logo lớp" class="w-10 h-10 rounded-full">
+                    <div>
+                        <span class="font-bold text-xl">10A2 K26</span>
+                        <span class="text-white">THPT Quế Lâm</span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="py-2 px-3 font-medium">Trang chủ</a>
+                    <a href="#memories" class="py-2 px-3 hover:text-purple-200 transition">Kỷ niệm</a>
+                    <a href="#teacher" class="py-2 px-3 hover:text-purple-200 transition">Giáo viên</a>
+                    <a href="#students" class="py-2 px-3 hover:text-purple-200 transition">Học sinh</a>
+                    <a href="#social" class="py-2 px-3 hover:text-purple-200 transition">Mạng xã hội</a>
+                    <div class="relative group">
+                        <button id="uploadBtn" onclick="isAuthenticated ? openUploadModal() : openPasswordModal()" 
+                            class="py-2 px-4 bg-white text-purple-600 rounded-lg hover:bg-purple-100 transition duration-300 flex items-center">
+                            <i data-feather="upload" class="mr-2"></i> Upload ảnh
+                        </button>
+
+                        <button id="logoutBtn" onclick="logout()" 
+                            class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition hidden">
+                            <i data-feather="x"></i>
+                        </button>              
+                    </div>
+                <div class="md:hidden flex items-center">
+                    <button class="outline-none mobile-menu-button">
+                        <i data-feather="menu"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="mobileMenu" class="hidden transition-all duration-300 ease-in-out transform -translate-y-5 opacity-0 pb-4">
+                <div class="flex flex-col space-y-3">
+                    <a href="#" class="hover:text-purple-200 transition">Trang chủ</a>
+                    <a href="#memories" class="hover:text-purple-200 transition">Kỷ niệm</a>
+                    <a href="#teacher" class="hover:text-purple-200 transition">Giáo viên</a>
+                    <a href="#students" class="hover:text-purple-200 transition">Học sinh</a>
+                    <a href="#social" class="hover:text-purple-200 transition">Mạng xã hội</a>
+                    <div id="mobileMenu" class="hidden md:hidden mt-2 space-y-2">
+                        <button id="mobileUploadBtn" 
+                            class="w-full py-2 px-4 bg-white text-purple-600 rounded-lg hover:bg-purple-100 transition duration-300 flex items-center justify-center">
+                            <i data-feather="upload" class="mr-2"></i> Upload ảnh
+                        </button>
+                        <button id="mobileLogoutBtn" onclick="logout()" 
+                            class="hidden w-full py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 flex items-center justify-center">
+                            <i data-feather="log-out" class="mr-2"></i> Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="gradient-bg text-white py-20 px-4">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center" data-aos="fade-up">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6">Kỷ Niệm Lớp 10A2 K26</h1>
+                <h2 class="text-2xl font-semibold mb-6">Nơi hội tụ những tâm hồn trẻ & đam mê học hỏi</h2>
+                <p class="text-lg mb-8">Chúng tôi là tập thể đoàn kết, sáng tạo, luôn nỗ lực hết mình để chinh phục mọi thử thách. Cùng nhau, chúng tôi viết nên những kỷ niệm thanh xuân rực rỡ nhất.</p>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#students" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-100 transition text-center">Gặp gỡ lớp</a>
+                    <a href="#social" class="border-2 border-white px-6 py-3 rounded-full font-medium hover:bg-white hover:text-purple-600 transition text-center">Kết nối</a>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center" data-aos="fade-left">
+                <img src="anhlop.png" alt="Ảnh tập thể lớp 10A2-K26 THPT Quế Lâm" class="rounded-lg shadow-2xl max-w-full h-auto transform hover:scale-105 transition duration-500">
+            </div>
+        </div>
+    </header>
+
+    <!-- Class Stats -->
+    <div class="bg-white py-8 shadow-md" data-aos="fade-up">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center text-center">
+                <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="45">0</div>
+                    <div class="text-gray-600">Học sinh</div>
+                </div>
+                <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="1">0</div>
+                    <div class="text-gray-600">Giáo viên</div>
+                </div>
+                <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="12">0</div>
+                    <div class="text-gray-600">Môn học</div>
+                </div>
+                <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="99">0</div>
+                    <div class="text-gray-600">Kỷ niệm</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memories Gallery -->
+    <section id="memories" class="py-16 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12" data-aos="fade-down">Bộ Sưu Tập Kỷ Niệm</h2>
+            <div class="memory-grid">
+                <div class="memory-card" data-aos="zoom-in">
+                    <img src="http://static.photos/education/640x360/1" alt="Memory" class="memory-img">
+                    <div class="memory-overlay">
+                        <h3 class="memory-title">Ngày khai giảng</h3>
+                        <p class="memory-date">01/09/2023</p>
+                    </div>
+                    <div class="memory-actions">
+                        <button class="memory-action-btn edit-btn" onclick="editMemory(1)">
+                            <i data-feather="edit" class="w-4 h-4"></i>
+                        </button>
+                        <button class="memory-action-btn delete-btn" onclick="deleteMemory(1)">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="memory-card" data-aos="zoom-in" data-aos-delay="100">
+                    <img src="http://static.photos/education/640x360/2" alt="Memory" class="memory-img">
+                    <div class="memory-overlay">
+                        <h3 class="memory-title">Hoạt động ngoại khóa</h3>
+                        <p class="memory-date">15/10/2023</p>
+                    </div>
+                </div>
+                <div class="memory-card" data-aos="zoom-in" data-aos-delay="200">
+                    <img src="http://static.photos/education/640x360/3" alt="Memory" class="memory-img">
+                    <div class="memory-overlay">
+                        <h3 class="memory-title">Lễ 20/11</h3>
+                        <p class="memory-date">20/11/2023</p>
+                    </div>
+                </div>
+                <div class="memory-card" data-aos="zoom-in" data-aos-delay="300">
+                    <img src="http://static.photos/education/640x360/4" alt="Memory" class="memory-img">
+                    <div class="memory-overlay">
+                        <h3 class="memory-title">Hội trại</h3>
+                        <p class="memory-date">22/12/2023</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Homeroom Teacher -->
+    <section id="teacher" class="py-16 bg-gray-50" data-aos="fade-up">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Giáo viên chủ nhiệm</h2>
+            <div class="flex flex-col md:flex-row items-center bg-white rounded-xl shadow-lg overflow-hidden max-w-4xl mx-auto">
+                <div class="md:w-1/3">
+                    <img src="gvcn.jpg" alt="Giáo viên" class="w-full h-full object-cover">
+                </div>
+                <div class="md:w-2/3 p-8">
+                    <h3 class="text-2xl font-bold text-purple-600 mb-2">Cô Nguyễn Thị Thu Hà</h3>
+                    <p class="text-gray-500 mb-4">Giáo viên Vật lý</p>
+                    <div class="flex mb-4">
+                        <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mr-2">Kiên nhẫn</span>
+                        <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mr-2">Hỗ trợ</span>
+                        <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm">Truyền cảm hứng</span>
+                    </div>
+                    <p class="text-gray-700 mb-6">Với hơn 15 năm kinh nghiệm giảng dạy, cô Hà luôn đồng hành cùng học sinh để không chỉ giúp các em giỏi kiến thức mà còn tự tin, nhân ái và sáng tạo.</p>
+                    <div class="border-t pt-4">
+                        <h4 class="font-semibold mb-2">Triết lý giảng dạy:</h4>
+                        <p class="text-gray-600 italic">"Mỗi học sinh đều là một hạt giống tiềm năng, chỉ cần được gieo trồng và chăm sóc đúng cách sẽ nở rộ."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Students Section -->
+    <section id="students" class="py-16 bg-white" data-aos="fade-up">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Danh sách học sinh lớp</h2>
+            <div class="mb-8">
+                <div class="bg-purple-100 rounded-full p-1 inline-flex">
+                    <button class="filter-btn active bg-white text-purple-600 px-4 py-1 rounded-full font-medium" data-filter="all">Tất cả</button>
+                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="monitor">Lớp trưởng</button>
+                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="studying deputy-labor assistant-arts">Lớp phó</button>
+                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="secretary">Thư ký</button>
+                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="group-leader">Tổ trưởng</button>
+                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="member">Thành viên</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" id="student-container">
+                <!-- Students will be loaded here by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Class Activities Marquee -->
+    <div class="bg-purple-600 text-white py-4 overflow-hidden relative">
+    <div class="marquee-wrapper">
+        <div class="marquee text-xl font-medium">
+        <span class="mx-8">💖 10A2 K26 •</span>
+        <span class="mx-8">✨ THPT Quế Lâm •</span>
+        <span class="mx-8">🔥 Maths •</span>
+        <span class="mx-8">📚 Physics •</span>
+        <span class="mx-8">🎓 Chemistry •</span>
+        <span class="mx-8">👑 Website Make By Kiên •</span>
+        </div>
+        <!-- Clone để chạy loop mượt -->
+        <div class="marquee text-xl font-medium">
+        <span class="mx-8">💖 10A2 K26 •</span>
+        <span class="mx-8">✨ THPT Quế Lâm •</span>
+        <span class="mx-8">🔥 Maths •</span>
+        <span class="mx-8">📚 Physics •</span>
+        <span class="mx-8">🎓 Chemistry •</span>
+        <span class="mx-8">👑 Website Make By Kiên •</span>
+        </div>
+    </div>
+    </div>
+
+    <!-- Social Media Section -->
+    <section id="social" class="py-16 bg-white" data-aos="fade-up">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Kết nối với lớp</h2>
+            <div class="flex flex-wrap justify-center gap-8">
+                <a href="https://www.tiktok.com/@10a2k26thptquelam" target="_blank" rel="noopener noreferrer" class="social-card bg-gray-50 rounded-xl p-6 text-center w-full sm:w-1/2 md:w-1/3 lg:w-1/4 shadow-md hover:shadow-lg transition block">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fab fa-tiktok text-3xl text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">TikTok</h3>
+                    <p class="text-gray-600 mb-4">Xem các video vui nhộn</p>
+                    <span class="text-purple-600 font-medium hover:underline">10A2-K26 THPT Quế Lâm</span>
+                </a>
+
+                <a href="https://www.facebook.com/profile.php?id=61578651402864" target="_blank" rel="noopener noreferrer" class="social-card bg-gray-50 rounded-xl p-6 text-center w-full sm:w-1/2 md:w-1/3 lg:w-1/4 shadow-md hover:shadow-lg transition block">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fab fa-facebook text-3xl text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Facebook</h3>
+                    <p class="text-gray-600 mb-4">Fanpage chính thức</p>
+                    <span class="text-blue-600 font-medium hover:underline">10A2-K26 THPT Quế Lâm</span>
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-16 bg-purple-600 text-white" data-aos="fade-up">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Cảm nhận học sinh</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm">
+                    <div class="flex items-center mb-4">
+                        <img src="img/vuong.jpg" alt="HS1" class="rounded-full w-12 h-12 mr-4">
+                        <div>
+                            <h4 class="font-semibold">Hoàng Quốc Vương</h4>
+                            <p class="text-purple-200 text-sm">Lớp trưởng</p>
+                        </div>
+                    </div>
+                    <p class="italic">"Lớp 10A2-K26 là gia đình thứ hai của mình. Mỗi ngày đều là một trải nghiệm đáng nhớ."</p>
+                </div>
+                <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm">
+                    <div class="flex items-center mb-4">
+                        <img src="img/vankhanh.jpg" alt="HS2" class="rounded-full w-12 h-12 mr-4">
+                        <div>
+                            <h4 class="font-semibold">Trần Vân Khánh</h4>
+                            <p class="text-purple-200 text-sm">Lớp phó</p>
+                        </div>
+                    </div>
+                    <p class="italic">"Mình rất tự hào khi được là thành viên của lớp 10A2-K26. Tập thể lớp luôn đoàn kết và hỗ trợ nhau trong mọi hoạt động."</p>
+                </div>
+                <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm">
+                    <div class="flex items-center mb-4">
+                        <img src="img/hoangquocvuong.jpg" alt="HS3" class="rounded-full w-12 h-12 mr-4">
+                        <div>
+                            <h4 class="font-semibold">Nguyễn Thu Hà</h4>
+                            <p class="text-purple-200 text-sm">Thư ký</p>
+                        </div>
+                    </div>
+                    <p class="italic">"Lớp học không chỉ là nơi học tập mà còn là nơi chúng mình cùng nhau tạo nên những kỷ niệm đẹp."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12" data-aos="fade-up">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <h3 class="text-xl font-bold mb-4">10A2-K26</h3>
+                    <p class="mb-4 text-gray-400">Trường THPT Quế Lâm</p>
+                    <p class="text-gray-400">Năm học 2025-2026</p>
+                </div>
+                <div class="mb-8 md:mb-0">
+                    <h4 class="text-lg font-semibold mb-4">Liên kết nhanh</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Trang chủ</a></li>
+                        <li><a href="#memories" class="text-gray-400 hover:text-white transition">Kỷ niệm</a></li>
+                        <li><a href="#teacher" class="text-gray-400 hover:text-white transition">Giáo viên</a></li>
+                        <li><a href="#students" class="text-gray-400 hover:text-white transition">Học sinh</a></li>
+                        <li><a href="#social" class="text-gray-400 hover:text-white transition">Mạng xã hội</a></li>
+                    </ul>
+                </div>
+                <div class="mb-8 md:mb-0">
+                    <h4 class="text-lg font-semibold mb-4">Liên hệ</h4>
+                    <p class="text-gray-400 mb-2">
+                        Địa chỉ: <a href="https://maps.app.goo.gl/BAZCGSRj3Dj6uUu67" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-400">Trường THPT Quế Lâm</a>
+                    </p>
+                    <p class="text-gray-400">Email Trường: doantruongquelam@gmail.com</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Theo dõi</h4>
+                    <div class="flex space-x-4">
+                        <a href="https://www.facebook.com/profile.php?id=61578651402864" target="_blank" rel="noopener noreferrer" class="bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@10a2k26thptquelam" target="_blank" rel="noopener noreferrer" class="bg-gray-700 w-10 h-10 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Lớp 10A2-K26, Trường THPT Quế Lâm.</p>
+                <p class="text-gray-400 mb-2">
+                    Website made by <a href="https://www.facebook.com/le.trung.kien.2k10/" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-400">Kiên</a> with 💖
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4" data-aos="zoom-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Nhập mật khẩu</h3>
+                <button onclick="closePasswordModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <p class="text-gray-600 mb-6">Vui lòng nhập mật khẩu lớp để tiếp tục upload ảnh.</p>
+            <div class="mb-6">
+                <input type="password" id="passwordInput" placeholder="Nhập mật khẩu" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <p id="passwordError" class="text-red-500 text-sm mt-2 hidden">Mật khẩu không đúng. Vui lòng thử lại.</p>
+            </div>
+            <button onclick="checkPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                Xác nhận
+            </button>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4" data-aos="zoom-in">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Upload ảnh</h3>
+                <button onclick="closeUploadModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <form id="uploadForm" class="space-y-4">
+                <div>
+                    <label for="imageTitle" class="block text-gray-700 mb-2">Tiêu đề ảnh</label>
+                    <input type="text" id="imageTitle" placeholder="Ví dụ: Lễ khai giảng 2025" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="imageDate" class="block text-gray-700 mb-2">Ngày chụp</label>
+                    <input type="date" id="imageDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label for="imageFile" class="block text-gray-700 mb-2">Chọn ảnh</label>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="imageFile" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <i data-feather="upload" class="w-8 h-8 text-gray-500 mb-2"></i>
+                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click để upload</span> hoặc kéo thả</p>
+                                <p class="text-xs text-gray-500">PNG, JPG (Tối đa 5MB)</p>
+                            </div>
+                            <input id="imageFile" type="file" class="hidden" accept="image/*" />
+                        </label>
+                    </div>
+                    <div id="fileName" class="text-sm text-gray-500 mt-2 hidden"></div>
+                </div>
+                <div class="pt-4">
+                    <button type="button" onclick="uploadImage()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                        <i data-feather="upload" class="mr-2"></i> Upload ảnh
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center hidden z-50" data-aos="fade-left">
+        <i data-feather="check-circle" class="mr-2"></i>
+        <span>Upload ảnh thành công!</span>
+    </div>
+
+    <!-- Dark Mode Button -->
+    <button id="darkModeBtn" class="fixed bottom-20 right-4 z-[1000] bg-purple-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-purple-800 transition-all hover:scale-110">
+    </button>
+
+    <script>
+        // Initialize AOS and Feather Icons
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+        feather.replace();
+
+        // Authentication state
+        let isAuthenticated = false;
+        const correctPassword = "10A2K26"; // Change this to your desired password
+        
+        // Check authentication from localStorage on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const authStatus = localStorage.getItem('isAuthenticated');
+            isAuthenticated = authStatus === 'true';
+            
+            if (isAuthenticated) {
+                showMemoryActions();
+                updateUploadButtonUI();
+            }
+        });
+        
+        function updateUploadButtonUI() {
+            const uploadBtn = document.getElementById('uploadBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const mobileUploadBtn = document.getElementById('mobileUploadBtn');
+            const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+
+            if (isAuthenticated) {
+                // Desktop
+                uploadBtn.onclick = openUploadModal;
+                uploadBtn.innerHTML = '<i data-feather="upload" class="mr-2"></i> Upload ảnh';
+                logoutBtn.classList.remove('hidden');
+
+                // Mobile
+                mobileUploadBtn.onclick = openUploadModal;
+                mobileUploadBtn.innerHTML = '<i data-feather="upload" class="mr-2"></i> Upload ảnh';
+                mobileLogoutBtn.classList.remove('hidden');
+            } else {
+                // Desktop
+                uploadBtn.onclick = openPasswordModal;
+                uploadBtn.innerHTML = '<i data-feather="lock" class="mr-2"></i> Nhập mật khẩu';
+                logoutBtn.classList.add('hidden');
+
+                // Mobile
+                mobileUploadBtn.onclick = openPasswordModal;
+                mobileUploadBtn.innerHTML = '<i data-feather="lock" class="mr-2"></i> Nhập mật khẩu';
+                mobileLogoutBtn.classList.add('hidden');
+            }
+            feather.replace();
+        }
+
+        function openPasswordModal() {
+            if (isAuthenticated) {
+                openUploadModal();
+            } else {
+                document.getElementById('passwordModal').classList.remove('hidden');
+            }
+        }
+        
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            document.getElementById('passwordError').classList.add('hidden');
+            document.getElementById('passwordInput').value = '';
+        }
+        
+        function checkPassword() {
+            const enteredPassword = document.getElementById('passwordInput').value;
+            const errorElement = document.getElementById('passwordError');
+            
+            if (enteredPassword === correctPassword) {
+                isAuthenticated = true;
+                localStorage.setItem('isAuthenticated', 'true');
+                closePasswordModal();
+                openUploadModal();
+                showMemoryActions();
+                updateUploadButtonUI();
+                showSuccessToast("Đăng nhập thành công!");
+            } else {
+                errorElement.textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+                errorElement.classList.remove('hidden');
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+        
+        // Upload modal functions
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.remove('hidden');
+        }
+        
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+            document.getElementById('uploadForm').reset();
+            document.getElementById('fileName').classList.add('hidden');
+        }
+        
+        // File input display
+        document.getElementById('imageFile').addEventListener('change', function(e) {
+            const fileNameElement = document.getElementById('fileName');
+            if (this.files.length > 0) {
+                fileNameElement.textContent = this.files[0].name;
+                fileNameElement.classList.remove('hidden');
+            } else {
+                fileNameElement.classList.add('hidden');
+            }
+        });
+        
+        // Upload function (simulated)
+        function uploadImage() {
+            const title = document.getElementById('imageTitle').value;
+            const date = document.getElementById('imageDate').value;
+            const file = document.getElementById('imageFile').files[0];
+            const isEditing = document.getElementById('uploadForm').dataset.editing;
+            
+            if (!title || !date) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
+
+            if (!isEditing && !file) {
+                alert('Vui lòng chọn ảnh!');
+                return;
+            }
+            
+            // Simulate upload (in a real app, you would upload to a server here)
+            setTimeout(() => {
+                closeUploadModal();
+                showSuccessToast();
+                
+                if (isEditing) {
+                    // Update existing memory
+                    const memoryItem = document.querySelector(`.memory-item[data-id="${isEditing}"]`);
+                    if (memoryItem) {
+                        memoryItem.querySelector('h3').textContent = title;
+                        memoryItem.querySelector('p').textContent = new Date(date).toLocaleDateString('vi-VN');
+                        if (file) {
+                            memoryItem.querySelector('img').src = URL.createObjectURL(file);
+                        }
+                    }
+                    showSuccessToast("Cập nhật ảnh thành công!");
+                } else {
+                    // Add new memory
+                    const memoryId = Date.now();
+                    const newMemory = document.createElement('div');
+                    newMemory.className = 'memory-card';
+                    newMemory.dataset.id = memoryId;
+                    newMemory.innerHTML = `
+                        <img src="${URL.createObjectURL(file)}" alt="${title}" class="memory-img">
+                        <div class="memory-overlay">
+                            <h3 class="memory-title">${title}</h3>
+                            <p class="memory-date">${new Date(date).toLocaleDateString('vi-VN')}</p>
+                        </div>
+                        <div class="memory-actions">
+                            <button class="memory-action-btn edit-btn" onclick="editMemory(${memoryId})">
+                                <i data-feather="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="memory-action-btn delete-btn" onclick="deleteMemory(${memoryId})">
+                                <i data-feather="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    document.querySelector('.memory-grid').prepend(newMemory);
+                    showSuccessToast("Thêm ảnh thành công!");
+                }
+                
+                feather.replace();
+                document.getElementById('uploadForm').removeAttribute('data-editing');
+            }, 1500);
+        }
+        
+        function showSuccessToast(message = "Upload ảnh thành công!") {
+            const toast = document.getElementById('successToast');
+            toast.querySelector('span').textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function showMemoryActions() {
+            const memoryActions = document.querySelectorAll('.memory-actions');
+            memoryActions.forEach(actions => {
+                if (actions) {
+                    actions.style.display = isAuthenticated ? 'flex' : 'none';
+                }
+            });
+            
+            // Also update edit/delete buttons in existing memories
+            document.querySelectorAll('.edit-memory-btn, .delete-memory-btn').forEach(btn => {
+                btn.style.display = isAuthenticated ? 'flex' : 'none';
+            });
+        }
+
+        // Logout function
+        function logout() {
+            isAuthenticated = false;
+            localStorage.removeItem('isAuthenticated');
+            showMemoryActions();
+            updateUploadButtonUI();
+            showSuccessToast("Đã đăng xuất!");
+            closeUploadModal();
+        }
+        
+        function logout() {
+            isAuthenticated = false;
+            updateUploadButtonUI();
+        }
+
+        // Delete memory function
+        function deleteMemory(id) {
+            if (!isAuthenticated) {
+                showSuccessToast("Vui lòng đăng nhập để thực hiện!");
+                openPasswordModal();
+                return;
+            }
+
+            if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
+                const memoryItem = document.querySelector(`.memory-card[data-id="${id}"]`);
+                if (memoryItem) {
+                    memoryItem.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        memoryItem.remove();
+                        showSuccessToast("Đã xóa ảnh thành công!");
+                    }, 300);
+                }
+            }
+        }
+
+        // Edit memory function
+        function editMemory(id) {
+            if (!isAuthenticated) {
+                showSuccessToast("Vui lòng đăng nhập để thực hiện!");
+                openPasswordModal();
+                return;
+            }
+
+            const memoryItem = document.querySelector(`.memory-card[data-id="${id}"]`);
+            if (memoryItem) {
+                const title = memoryItem.querySelector('.memory-title').textContent;
+                const date = memoryItem.querySelector('.memory-date').textContent;
+                
+                document.getElementById('imageTitle').value = title;
+                document.getElementById('imageDate').value = new Date(date).toISOString().split('T')[0];
+                document.getElementById('uploadForm').dataset.editing = id;
+                
+                openUploadModal();
+            }
+        }
+
+        // Initialize memory actions
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-btn')) {
+                const memoryItem = e.target.closest('.memory-card');
+                deleteMemory(memoryItem.dataset.id);
+            }
+            
+            if (e.target.closest('.edit-btn')) {
+                const memoryItem = e.target.closest('.memory-card');
+                editMemory(memoryItem.dataset.id);
+            }
+        });
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.id === 'passwordModal') {
+                closePasswordModal();
+            }
+            if (event.target.id === 'uploadModal') {
+                closeUploadModal();
+            }
+        }
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('-translate-y-5');
+                mobileMenu.classList.toggle('opacity-0');
+            });
+        }
+
+        // Scroll to Top (hiệu ứng mượt)
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 200) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Counter animation nâng cấp: chỉ chạy khi hiện trên màn hình
+        function animateCounter(counter) {
+            const target = +counter.getAttribute('data-target');
+            const duration = 2000;
+            const startTime = performance.now();
+            function update(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                counter.textContent = Math.floor(progress * target);
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+        function checkCounters() {
+            document.querySelectorAll('.counter').forEach(counter => {
+                const rect = counter.getBoundingClientRect();
+                if(rect.top < window.innerHeight && rect.bottom > 0 && counter.textContent === '0') {
+                    animateCounter(counter);
+                }
+            });
+        }
+        window.addEventListener('scroll', checkCounters);
+        window.addEventListener('load', checkCounters);
+
+        // Student list generator
+        const studentContainer = document.getElementById('student-container');
+
+        // Danh sách học sinh (role là mảng)
+        const students = [
+            { name: 'Hoàng Quốc Vương', role: ['monitor'], img: 'img/vuong.jpg' },
+            { name: 'Nguyễn Duy Anh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Thanh Chúc', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Mạnh Cường', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Thanh Thùy Dung', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Trần Đăng Dũng', role: ['member'], img: 'img/dung.jpg' },
+            { name: 'Trần Quang Định', role: ['member'], img: 'img/quangdinh.jpg' },
+            { name: 'Phạm Minh Đức', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Đỗ Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Khắc Hiếu', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Vi Sĩ Hoan', role: ['member'], img: 'img/vihoan.jpg' },
+            { name: 'Vũ Kim Huệ', role: ['member'], img: 'img/hue.jpg' },
+            { name: 'Nguyễn Văn Huy', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Phú Hưng', role: ['member'], img: 'img/phuhung.jpg' },
+            { name: 'Nguyễn Xuân Hưng', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Trần Vân Khánh', role: ['assistant-arts'], img: 'img/vankhanh.jpg' },
+            { name: 'Lê Trung Kiên', role: ['special'], img: 'img/ADMIN.jpg' },
+            { name: 'Nguyễn Trung Kiên', role: ['member'], img: 'img/nguyenkien.jpg' },
+            { name: 'Nguyễn Bảo Lâm', role: ['member'], img: 'img/lam.jpg' },
+            { name: 'Nguyễn Thu Lê', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Lê Thị Ngọc Linh', role: ['member'], img: 'img/ngoclinh.jpg' },
+            { name: 'Nguyễn Hà Nhật Linh', role: ['member'], img: 'img/nhatlinh.jpg' },
+            { name: 'Nguyễn Hoàng Linh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Phạm Bảo Nhật Linh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Đức Lĩnh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Bùi Khánh Ly', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Kiều Ngọc Mai', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Xuân Mai', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Hoàng Minh', role: ['member'], img: 'img/minh.jpg' },
+            { name: 'Ngô Nguyên Hải Nam', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Thành Nam', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Vũ Bảo Ngọc', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Khánh Hưng', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Phạm Công Sơn', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Thanh Thảo', role: ['member'], img: 'img/thanhthao.jpg' },
+            { name: 'Nguyễn Thị Thân Thương', role: ['member'], img: 'img/thuong.jpg' },
+            { name: 'Hoàng Mạnh Tiến', role: ['member'], img: 'img/tien.jpg' },
+            { name: 'Nguyễn Thu Trang', role: ['member'], img: 'img/trang.jpg' },
+            { name: 'Nguyễn Thanh Tuyền', role: ['member'], img: 'img/tuyen.jpg' },
+            { name: 'Đỗ Thy', role: ['member'], img: 'img/thy.jpg' },
+            { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg' },
+            { name: 'Phạm Hà Vy', role: ['member'], img: 'img/hoangquocvuong.jpg' }
+        ];
+
+        // Render danh sách
+        students.forEach((student) => {
+            const defaultImg = 'img/default.jpg';
+
+            // Tạo các badge vai trò
+            let roleBadges = '';
+            student.role.forEach(role => {
+                let badgeClass = '';
+                let badgeText = '';
+                
+                if (role === 'monitor') {
+                    badgeClass = 'monitor-badge';
+                    badgeText = 'Lớp trưởng';
+                } else if (role === 'secretary') {
+                    badgeClass = 'secretary-badge';
+                    badgeText = 'Thư ký';
+                } else if (role === 'group-leader') {
+                    badgeClass = 'group-leader-badge';
+                    badgeText = 'Tổ trưởng';
+                } else if (role === 'assistant-arts') {
+                    badgeClass = 'assistant-badge';
+                    badgeText = 'Lớp phó Văn nghệ';
+                } else if (role === 'deputy-labor') {
+                    badgeClass = 'assistant-badge';
+                    badgeText = 'Lớp phó Lao động';
+                } else if (role === 'studying') {
+                    badgeClass = 'assistant-badge';
+                    badgeText = 'Lớp phó Học tập';
+                } else {
+                    badgeClass = 'member-badge';
+                    badgeText = 'Thành viên';
+                }
+                
+                roleBadges += `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
+            });
+
+            // Xác định màu viền theo vai trò đầu tiên
+            let borderColor = '';
+            if (student.role.includes('monitor')) borderColor = 'border-purple-500';
+            else if (student.role.includes('deputy-labor')) borderColor = 'border-green-500';
+            else if (student.role.includes('studying')) borderColor = 'border-indigo-500';
+            else if (student.role.includes('secretary')) borderColor = 'border-yellow-500';
+            else if (student.role.includes('group-leader')) borderColor = 'border-blue-500';
+            else if (student.role.includes('assistant-arts')) borderColor = 'border-pink-500';
+
+            // HTML
+            studentContainer.innerHTML += `
+                <div class="student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderColor ? 'border-l-4 ' + borderColor : ''}" data-role="${student.role.join(' ')}">
+                    <div class="h-48 w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                        <img src="${student.img}" alt="${student.name}" class="h-full w-full object-cover"
+                            onerror="this.src='${defaultImg}';">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg">${student.name}</h3>
+                        <div class="mt-3 flex flex-wrap">
+                            ${roleBadges}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // Filter students
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b =>
+                    b.classList.remove('active', 'bg-white', 'text-purple-600')
+                );
+                btn.classList.add('active', 'bg-white', 'text-purple-600');
+
+                const filter = btn.dataset.filter;
+                document.querySelectorAll('.student-card').forEach(card => {
+                    const roles = card.dataset.role.split(' ');
+                    if (filter === 'all') {
+                        card.classList.remove('hidden');
+                    } else {
+                        // Nếu filter chứa nhiều role, kiểm tra từng role
+                        const filterRoles = filter.split(' ');
+                        card.classList.toggle('hidden', !filterRoles.some(r => roles.includes(r)));
+                    }
+                });
+            });
+        });
+
+        // Dark mode toggle
+        // Enhanced dark mode toggle with animation
+        const darkModeBtn = document.getElementById('darkModeBtn');
+        darkModeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            
+            // Add animation
+            darkModeBtn.classList.add('animate-pulse');
+            setTimeout(() => {
+                darkModeBtn.classList.remove('animate-pulse');
+            }, 300);
+            
+            // Update icon with smooth transition
+            if(document.body.classList.contains('dark')) {
+                darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
+            } else {
+                darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+            }
+            feather.replace();
+        });
+
+        // Initialize dark mode icon
+        darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+        feather.replace();
+    </script>
+</body>
+</html>
