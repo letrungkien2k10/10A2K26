@@ -341,16 +341,16 @@
                     <div class="text-gray-600">Học sinh</div>
                 </div>
                 <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
-                    <div class="text-4xl font-bold text-purple-600 counter" data-target="1">0</div>
-                    <div class="text-gray-600">Giáo viên</div>
-                </div>
-                <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
-                    <div class="text-4xl font-bold text-purple-600 counter" data-target="12">0</div>
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="11">0</div>
                     <div class="text-gray-600">Môn học</div>
                 </div>
                 <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
-                    <div class="text-4xl font-bold text-purple-600 counter" data-target="99">0</div>
-                    <div class="text-gray-600">Kỷ niệm</div>
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="1">0</div>
+                    <div class="text-gray-600">Giáo viên Chủ Nhiệm</div>
+                </div>
+                <div class="w-full sm:w-1/2 md:w-1/4 px-4 py-4">
+                    <div class="text-4xl font-bold text-purple-600 counter" data-target="11">0</div>
+                    <div class="text-gray-600">Giáo viên Bộ Môn</div>
                 </div>
             </div>
         </div>
@@ -379,6 +379,15 @@
             </div>
         </div>
     </section>
+
+    <!-- Pagination -->
+    <div id="pagination" class="flex justify-center items-center space-x-2 mt-8"></div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[1000] hidden">
+        <span class="absolute top-4 right-6 text-white text-4xl cursor-pointer" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" src="" alt="Ảnh phóng to" class="max-h-[90%] max-w-[90%] rounded-lg shadow-2xl">
+    </div>
 
     <!-- Homeroom Teacher -->
     <section id="teacher" class="py-16 bg-gray-50" data-aos="fade-up">
@@ -1114,6 +1123,93 @@
         // Initialize dark mode icon
         darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
         feather.replace();
-    </script>
+
+        // Open image modal
+        function openImageModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = src;
+            modal.classList.remove('hidden');
+        }
+
+        // Close image modal
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        // Gán sự kiện click cho tất cả ảnh trong memory-card
+        document.addEventListener('click', function(e) {
+            const img = e.target.closest('.memory-img');
+            if (img) {
+                openImageModal(img.src);
+            }
+        });
+
+        // Pagination setup
+        let currentPage = 1;
+        const itemsPerPage = 8; // số ảnh trên 1 trang (có thể chỉnh)
+        function renderPagination() {
+            const memories = document.querySelectorAll('.memory-card');
+            const totalItems = memories.length;
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            // Nút Prev
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '«';
+            prevBtn.className = `px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            };
+            pagination.appendChild(prevBtn);
+
+            // Các số trang
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 hover:bg-purple-100'}`;
+                btn.onclick = () => {
+                    currentPage = i;
+                    showPage(currentPage);
+                };
+                pagination.appendChild(btn);
+            }
+
+            // Nút Next
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '»';
+            nextBtn.className = `px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            };
+            pagination.appendChild(nextBtn);
+        }
+
+        function showPage(page) {
+            const memories = document.querySelectorAll('.memory-card');
+            memories.forEach((memory, index) => {
+                if (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) {
+                    memory.classList.remove('hidden');
+                } else {
+                    memory.classList.add('hidden');
+                }
+            });
+            renderPagination();
+        }
+
+        // Khởi tạo phân trang sau khi load
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage(currentPage);
+        });
+            </script>
 </body>
 </html>
