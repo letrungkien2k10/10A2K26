@@ -248,6 +248,13 @@
             background-color: #ef4444;
             color: white;
         }
+        /* Ẩn nút scroll top + dark mode trên mobile */
+        @media (max-width: 768px) {
+        #scrollTopBtn,
+        #darkModeBtn {
+            display: none !important;
+        }
+        }
     </style>
 </head>
 <body class="bg-memory min-h-screen">
@@ -362,10 +369,10 @@
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-12" data-aos="fade-down">Bộ Sưu Tập Kỷ Niệm</h2>
             <div class="memory-grid">
                 <div class="memory-card" data-aos="zoom-in">
-                    <img src="http://static.photos/education/640x360/1" alt="Memory" class="memory-img">
+                    <img src="How to Upload.png" alt="Memory" class="memory-img">
                     <div class="memory-overlay">
-                        <h3 class="memory-title">Ngày khai giảng</h3>
-                        <p class="memory-date">01/09/2023</p>
+                        <h3 class="memory-title">How to upload photos?</h3>
+                        <p class="memory-date">14/09/2025</p>
                     </div>
                     <div class="memory-actions">
                         <button class="memory-action-btn edit-btn" onclick="editMemory(1)">
