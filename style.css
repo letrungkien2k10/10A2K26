@@ -140,8 +140,15 @@ body.dark .shadow-md, body.dark .shadow-lg {
     color: white;
 }
 .member-badge {
-    background-color: #6b7280;
-    color: white;
+    background: #d1fae5;
+    color: #059616;
+    border-radius: 9999px;
+    padding: 2px 12px;
+    font-size: 0.95em;
+    font-weight: 500;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    display: inline-block;
 }
 .assistant-badge {
     background-color: #ec4899;
@@ -237,4 +244,12 @@ body.dark .shadow-md, body.dark .shadow-lg {
 .filter-btn[data-filter="member"] {
     display: none !important;
 }
+}
+/* Làm mượt hơn cho ô tìm kiếm và sắp xếp */
+#searchMemory, #sortMemory {
+  transition: all 0.2s ease;
+}
+#searchMemory:focus, #sortMemory:focus {
+  border-color: #7b2ff7;
+  box-shadow: 0 0 0 3px rgba(123, 47, 247, 0.2);
 }

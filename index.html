@@ -118,16 +118,38 @@
             </div>
         </div>
     </div>
-
-    <!-- Memories Gallery -->
+    
+    <!-- Memories Gallery with Search and Sort -->
     <section id="memories" class="py-16 px-4">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-12" data-aos="fade-down">Bộ Sưu Tập Kỷ Niệm</h2>
-            <div class="memory-grid">
-                <!-- Các .memory-card sẽ được thêm ở đây bằng JS khi upload -->
+    <div class="max-w-6xl mx-auto">
+        <!-- Tiêu đề -->
+        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8" data-aos="fade-down">
+            Bộ Sưu Tập Kỷ Niệm
+        </h2>
+
+        <!-- 🔍 Thanh tìm kiếm + sắp xếp (ngay dưới tiêu đề) -->
+        <div class="bg-white shadow-md rounded-xl p-4 mb-8 flex flex-col md:flex-row items-center gap-4">
+            <div class="flex-1 w-full">
+            <input type="text" id="searchMemory" placeholder="🔍 Tìm ảnh theo tiêu đề..." 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+            </div>
+            <div>
+            <select id="sortMemory" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                <option value="newest">📅 Mới nhất trước</option>
+                <option value="oldest">📅 Cũ nhất trước</option>
+                <option value="title">🔠 Theo tiêu đề (A→Z)</option>
+            </select>
             </div>
         </div>
+
+        <!-- Grid ảnh -->
+        <div class="memory-grid">
+            <!-- Các .memory-card sẽ được thêm ở đây bằng JS khi upload -->
+        </div>
+    </div>
     </section>
+
 
     <!-- How to upload photos? Section -->
     <section id="how-to-upload" class="py-12 px-4 bg-white">
@@ -136,10 +158,11 @@
             <div class="flex flex-col md:flex-row items-center gap-8">
                 <!-- Bên trái: Ảnh hướng dẫn -->
                 <div class="flex-1 flex justify-center">
-                    <div class="memory-card border-4 border-purple-500 shadow-xl scale-105" data-aos="zoom-in">
+                    <div class="memory-card border-4 border-purple-500 shadow-xl scale-105" 
+                        data-aos="zoom-in" data-type="guide">
                         <img src="How to Upload.png" alt="How to upload photos?" 
-                             class="rounded-lg shadow-lg w-full max-w-2xl aspect-video object-contain bg-white memory-img" 
-                             style="background:#fff;cursor:pointer;">
+                            class="rounded-lg shadow-lg w-full max-w-2xl aspect-video object-contain bg-white memory-img" 
+                            style="background:#fff;cursor:pointer; min-height: 230px;">
                         <div class="memory-overlay">
                             <h3 class="memory-title">Hướng dẫn upload ảnh</h3>
                             <p class="memory-date">14/09/2025</p>
@@ -421,6 +444,11 @@
     <!-- Dark Mode Button -->
     <button id="darkModeBtn" class="fixed bottom-20 right-4 z-[1000] bg-purple-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-purple-800 transition-all hover:scale-110">
     </button>
+    <!-- Search Student -->
+        <div class="mb-6 text-center">
+            <input type="text" id="searchStudent" placeholder="Tìm học sinh..." 
+                class="px-4 py-2 border rounded-lg w-full md:w-1/3 focus:ring-2 focus:ring-purple-500">
+        </div>
     <script>
         // Initialize AOS and Feather Icons
         AOS.init({
@@ -579,7 +607,7 @@
                             <button class="memory-action-btn edit-btn" onclick="editMemory(${memoryId})">
                                 <i data-feather="edit" class="w-4 h-4"></i>
                             </button>
-                            <button class="memory-action-btn delete-btn" onclick="deleteMemory(${memoryId})">
+                            <button class="memory-action-btn delete-btn">
                                 <i data-feather="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -756,10 +784,10 @@
             { name: 'Phạm Minh Đức', role: ['member'], img: 'img/hoangquocvuong.jpg' },
             { name: 'Đỗ Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg' },
             { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg' },
-            { name: 'Nguyễn Khắc Hiếu', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Khắc Hiếu', role: ['member'], img: 'img/hieu.jpg' },
             { name: 'Vi Sĩ Hoan', role: ['member'], img: 'img/vihoan.jpg' },
             { name: 'Vũ Kim Huệ', role: ['member'], img: 'img/hue.jpg' },
-            { name: 'Nguyễn Văn Huy', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+            { name: 'Nguyễn Văn Huy', role: ['member'], img: 'img/huy.jpg' },
             { name: 'Nguyễn Phú Hưng', role: ['member'], img: 'img/phuhung.jpg' },
             { name: 'Nguyễn Xuân Hưng', role: ['member'], img: 'img/hoangquocvuong.jpg' },
             { name: 'Trần Vân Khánh', role: ['member'], img: 'img/vankhanh.jpg' },
@@ -835,6 +863,8 @@
             else if (student.role.includes('secretary')) borderColor = 'border-yellow-500';
             else if (student.role.includes('group-leader')) borderColor = 'border-blue-500';
             else if (student.role.includes('assistant-arts')) borderColor = 'border-pink-500';
+            // Nếu chỉ là member thì không có border
+            if (student.role.length === 1 && student.role[0] === 'member') borderColor = '';
 
             // HTML
             studentContainer.innerHTML += `
@@ -852,6 +882,7 @@
                 </div>
             `;
         });
+        
 
         // Filter students
         document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -933,7 +964,8 @@
         let currentPage = 1;
         const itemsPerPage = 8; // số ảnh trên 1 trang (có thể chỉnh)
         function renderPagination() {
-            const memories = document.querySelectorAll('.memory-card');
+            const memories = Array.from(document.querySelectorAll('.memory-card'))
+                .filter(mem => mem.dataset.type !== "guide");
             const totalItems = memories.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
             const pagination = document.getElementById('pagination');
@@ -987,7 +1019,8 @@
         }
 
         function showPage(page) {
-            const memories = document.querySelectorAll('.memory-card');
+            const memories = Array.from(document.querySelectorAll('.memory-card'))
+                .filter(mem => mem.dataset.type !== "guide");
             const totalItems = memories.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
 
@@ -1006,6 +1039,45 @@
 
         // Khởi tạo phân trang sau khi load
         showPage(currentPage);
+
+        // Search & Sort Memories
+        const searchInput = document.getElementById('searchMemory');
+        const sortSelect = document.getElementById('sortMemory');
+
+        function filterAndSortMemories() {
+            const searchText = searchInput.value.toLowerCase();
+            let memories = Array.from(document.querySelectorAll('.memory-card'))
+                .filter(mem => mem.dataset.type !== "guide");
+
+            // Lọc theo tiêu đề
+            memories.forEach(mem => {
+                const title = mem.querySelector('.memory-title').textContent.toLowerCase();
+                mem.style.display = title.includes(searchText) ? 'block' : 'none';
+            });
+
+            // Sắp xếp
+            const sortValue = sortSelect.value;
+            let sorted = memories.filter(mem => mem.style.display !== 'none');
+            sorted.sort((a, b) => {
+                if (sortValue === 'title') {
+                    return a.querySelector('.memory-title').textContent.localeCompare(
+                        b.querySelector('.memory-title').textContent);
+                } else if (sortValue === 'newest') {
+                    return b.dataset.id - a.dataset.id; // id là timestamp
+                } else if (sortValue === 'oldest') {
+                    return a.dataset.id - b.dataset.id;
+                }
+            });
+
+            // Render lại
+            const grid = document.querySelector('.memory-grid');
+            sorted.forEach(mem => grid.appendChild(mem));
+
+            showPage(1); // reset về trang 1
+        }
+
+        searchInput.addEventListener('input', filterAndSortMemories);
+        sortSelect.addEventListener('change', filterAndSortMemories);
     </script>
 </body>
 </html>
