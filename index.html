@@ -12,6 +12,18 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Open Graph (Facebook, Zalo, v.v.) -->
+    <meta property="og:title" content="Lớp 10A2-K26 THPT Quế Lâm - Website chính thức">
+    <meta property="og:description" content="Trang web chính thức của lớp 10A2-K26, Trường THPT Quế Lâm. Cập nhật thông tin, hình ảnh, hoạt động và kết nối với thành viên lớp.">
+    <meta property="og:image" content="https://10a2k26thptquelam.netlify.app/anhlop.png"> <!-- thay link ảnh thật -->
+    <meta property="og:url" content="https://10a2k26thptquelam.netlify.app"> <!-- thay link web của bạn -->
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Lớp 10A2-K26 THPT Quế Lâm - Website chính thức">
+    <meta name="twitter:description" content="Trang web chính thức của lớp 10A2-K26. Nơi lưu giữ kỷ niệm và kết nối bạn bè.">
+    <meta name="twitter:image" content="https://10a2k26thptquelam.netlify.app/anhlop.png"> <!-- thay link ảnh thật -->
 </head>
 <body class="bg-memory min-h-screen">
     <!-- Scroll to Top Button -->
@@ -78,22 +90,35 @@
     </nav>
 
     <!-- Hero Section -->
-    <header class="gradient-bg text-white py-20 px-4">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center" data-aos="fade-up">
-            <div class="md:w-1/2 mb-10 md:mb-0">
-                <h1 class="text-4xl md:text-6xl font-bold mb-6">Kỷ Niệm Lớp 10A2 K26</h1>
-                <h2 class="text-2xl font-semibold mb-6">Nơi hội tụ những tâm hồn trẻ & đam mê học hỏi</h2>
-                <p class="text-lg mb-8">Chúng tôi là tập thể đoàn kết, sáng tạo, luôn nỗ lực hết mình để chinh phục mọi thử thách. Cùng nhau, chúng tôi viết nên những kỷ niệm thanh xuân rực rỡ nhất.</p>
-                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                    <a href="#students" class="bg-white text-purple-600 px-6 py-3 rounded-full font-medium hover:bg-purple-100 transition text-center">Gặp gỡ lớp</a>
-                    <a href="#social" class="border-2 border-white px-6 py-3 rounded-full font-medium hover:bg-white hover:text-purple-600 transition text-center">Kết nối</a>
-                </div>
-            </div>
-            <div class="md:w-1/2 flex justify-center" data-aos="fade-left">
-                <img src="anhlop.png" alt="Ảnh tập thể lớp 10A2-K26 THPT Quế Lâm" class="rounded-lg shadow-2xl max-w-full h-auto transform hover:scale-105 transition duration-500">
-            </div>
+    <section id="hero" class="relative py-24 flex items-center justify-center text-center md:text-left">
+    <!-- Background ảnh + gradient overlay -->
+    <div class="absolute inset-0">
+        <img src="anhlop.png" alt="Background lớp 10A2" class="w-full h-full object-cover opacity-30 dark:opacity-20">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-700/70 via-purple-500/60 to-transparent"></div>
+    </div>
+
+    <!-- Nội dung -->
+    <div class="relative max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+        <!-- Left -->
+        <div class="md:w-1/2" data-aos="fade-right">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white leading-tight drop-shadow-lg">
+            Lớp 10A2-K26 <br> Trường THPT Quế Lâm
+        </h1>
+        <p class="mt-6 text-lg text-gray-100 max-w-lg">
+            Trang web chính thức của lớp 10A2-K26 — nơi lưu giữ <b>kỷ niệm tuổi học trò</b> và kết nối bạn bè.
+        </p>
+        <a href="#memories" class="inline-block mt-8 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg transition transform hover:-translate-y-1 hover:shadow-2xl">
+            Xem Bộ Sưu Tập
+        </a>
         </div>
-    </header>
+
+        <!-- Right -->
+        <div class="md:w-1/2 relative" data-aos="fade-left">
+        <img src="anhlop.png" alt="Ảnh tập thể lớp 10A2-K26" 
+            class="rounded-2xl shadow-2xl max-w-full h-auto transform hover:scale-105 transition duration-500 border-4 border-white/70 dark:border-gray-700">
+        </div>
+    </div>
+    </section>
 
     <!-- Class Stats -->
     <div class="bg-white py-8 shadow-md" data-aos="fade-up">
@@ -147,44 +172,59 @@
         <div class="memory-grid">
             <!-- Các .memory-card sẽ được thêm ở đây bằng JS khi upload -->
         </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="flex justify-center items-center space-x-2 mt-8"></div>
     </div>
     </section>
 
-
     <!-- How to upload photos? Section -->
-    <section id="how-to-upload" class="py-12 px-4 bg-white">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl font-bold text-center text-purple-700 mb-6" data-aos="fade-down">How to upload photos?</h2>
-            <div class="flex flex-col md:flex-row items-center gap-8">
-                <!-- Bên trái: Ảnh hướng dẫn -->
-                <div class="flex-1 flex justify-center">
-                    <div class="memory-card border-4 border-purple-500 shadow-xl scale-105" 
-                        data-aos="zoom-in" data-type="guide">
-                        <img src="How to Upload.png" alt="How to upload photos?" 
-                            class="rounded-lg shadow-lg w-full max-w-2xl aspect-video object-contain bg-white memory-img" 
-                            style="background:#fff;cursor:pointer; min-height: 230px;">
-                        <div class="memory-overlay">
-                            <h3 class="memory-title">Hướng dẫn upload ảnh</h3>
-                            <p class="memory-date">14/09/2025</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- Bên phải: Video hướng dẫn -->
-                <div class="flex-1 flex justify-center">
-                    <video controls class="rounded-lg shadow-lg w-full max-w-2xl aspect-video bg-black" data-aos="zoom-in">
-                        <source src="video.mp4" type="video/mp4">
-                        Trình duyệt của bạn không hỗ trợ video.
-                    </video>
-                </div>
-            </div>
-            <div class="mt-6 text-center text-gray-700">
-                <p>Bấm vào nút <b>Upload ảnh</b> ở menu để thêm kỷ niệm của bạn vào bộ sưu tập lớp!</p>
-            </div>
+    <section id="how-to-upload" class="py-16 px-4 bg-white dark:bg-gray-900">
+    <div class="max-w-5xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-purple-700 dark:text-purple-400 mb-12" data-aos="fade-down">
+        Cách Upload Ảnh
+        </h2>
+
+        <!-- Ảnh minh hoạ -->
+        <div class="flex justify-center mb-10" data-aos="zoom-in">
+        <img src="How to Upload.png" alt="Hướng dẫn Upload" 
+            class="rounded-lg shadow-lg max-w-lg w-full" loading="lazy">
         </div>
+
+        <!-- Step-by-Step Cards -->
+        <div class="grid md:grid-cols-3 gap-8">
+        <!-- Step 1 -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center hover:shadow-xl transition" data-aos="zoom-in">
+            <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 text-2xl font-bold">1</div>
+            <h3 class="font-semibold text-lg mb-2">Bấm nút Upload</h3>
+            <p class="text-gray-600 dark:text-gray-300">Chọn nút <b>Upload ảnh</b> ở menu để bắt đầu.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center hover:shadow-xl transition" data-aos="zoom-in" data-aos-delay="150">
+            <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 text-2xl font-bold">2</div>
+            <h3 class="font-semibold text-lg mb-2">Nhập thông tin</h3>
+            <p class="text-gray-600 dark:text-gray-300">Điền <b>tiêu đề</b>, <b>ngày chụp</b> và chọn ảnh (tối đa 5MB).</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 text-center hover:shadow-xl transition" data-aos="zoom-in" data-aos-delay="300">
+            <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 text-2xl font-bold">3</div>
+            <h3 class="font-semibold text-lg mb-2">Xác nhận Upload</h3>
+            <p class="text-gray-600 dark:text-gray-300">Ấn nút <b>Upload ảnh</b> để lưu kỷ niệm vào bộ sưu tập lớp.</p>
+        </div>
+        </div>
+
+        <!-- Video hướng dẫn -->
+        <div class="mt-12 flex justify-center" data-aos="fade-up">
+        <video controls class="rounded-lg shadow-lg w-full max-w-3xl aspect-video bg-black">
+            <source src="video.mp4" type="video/mp4">
+            Trình duyệt của bạn không hỗ trợ video.
+        </video>
+        </div>
+    </div>
     </section>
 
-    <!-- Pagination -->
-    <div id="pagination" class="flex justify-center items-center space-x-2 mt-8"></div>
 
     <!-- Image Modal -->
     <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[1000] hidden">
@@ -266,65 +306,78 @@
         <div class="max-w-6xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Kết nối với lớp</h2>
             <div class="flex flex-wrap justify-center gap-8">
-                <a href="https://www.tiktok.com/@10a2k26thptquelam" target="_blank" rel="noopener noreferrer" class="social-card bg-gray-50 rounded-xl p-6 text-center w-full sm:w-1/2 md:w-1/3 lg:w-1/4 shadow-md hover:shadow-lg transition block">
-                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fab fa-tiktok text-3xl text-purple-600"></i>
+                <a href="https://www.tiktok.com/@10a2k26thptquelam" target="_blank" 
+                rel="noopener noreferrer"
+                class="social-card bg-white rounded-2xl p-6 text-center w-full sm:w-1/2 md:w-1/3 lg:w-1/4 
+                        shadow-md hover:shadow-xl transition transform hover:-translate-y-2 duration-300 block">
+                    <div class="bg-gradient-to-tr from-purple-500 to-pink-500 w-20 h-20 rounded-full 
+                                flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i class="fab fa-tiktok text-3xl text-white"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2">TikTok</h3>
                     <p class="text-gray-600 mb-4">Xem các video vui nhộn</p>
                     <span class="text-purple-600 font-medium hover:underline">10A2-K26 THPT Quế Lâm</span>
                 </a>
-
-                <a href="https://www.facebook.com/profile.php?id=61578651402864" target="_blank" rel="noopener noreferrer" class="social-card bg-gray-50 rounded-xl p-6 text-center w-full sm:w-1/2 md:w-1/3 lg:w-1/4 shadow-md hover:shadow-lg transition block">
-                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fab fa-facebook text-3xl text-blue-600"></i>
+                <a href="https://www.facebook.com/profile.php?id=61578651402864" target="_blank" 
+                rel="noopener noreferrer"
+                class="social-card bg-white rounded-2xl p-6 text-center w-full sm:w-1/2 md:w-1/3 lg:w-1/4 
+                        shadow-md hover:shadow-xl transition transform hover:-translate-y-2 duration-300 block">
+                    <div class="bg-gradient-to-tr from-blue-500 to-cyan-400 w-20 h-20 rounded-full 
+                                flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <i class="fab fa-facebook-f text-3xl text-white"></i>
                     </div>
                     <h3 class="text-xl font-semibold mb-2">Facebook</h3>
                     <p class="text-gray-600 mb-4">Fanpage chính thức</p>
                     <span class="text-blue-600 font-medium hover:underline">10A2-K26 THPT Quế Lâm</span>
                 </a>
-
             </div>
         </div>
     </section>
 
     <!-- Testimonials -->
     <section class="py-16 bg-purple-600 text-white" data-aos="fade-up">
-        <div class="max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">Cảm nhận học sinh</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm">
-                    <div class="flex items-center mb-4">
-                        <img src="img/hoangquocvuong.jpg" alt="HS1" class="rounded-full w-12 h-12 mr-4">
-                        <div>
-                            <h4 class="font-semibold">...</h4>
-                            <p class="text-purple-200 text-sm">...</p>
-                        </div>
-                    </div>
-                    <p class="italic">"..."</p>
-                </div>
-                <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm">
-                    <div class="flex items-center mb-4">
-                        <img src="img/hoangquocvuong.jpg" alt="HS2" class="rounded-full w-12 h-12 mr-4">
-                        <div>
-                            <h4 class="font-semibold">...</h4>
-                            <p class="text-purple-200 text-sm">...</p>
-                        </div>
-                    </div>
-                    <p class="italic">"..."</p>
-                </div>
-                <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm">
-                    <div class="flex items-center mb-4">
-                        <img src="img/hoangquocvuong.jpg" alt="HS3" class="rounded-full w-12 h-12 mr-4">
-                        <div>
-                            <h4 class="font-semibold">...</h4>
-                            <p class="text-purple-200 text-sm">...</p>
-                        </div>
-                    </div>
-                    <p class="italic">"..."</p>
-                </div>
+    <div class="max-w-6xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-12">Cảm nhận học sinh</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+
+        <!-- HS 1 -->
+        <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm hover:scale-105 transition">
+            <div class="flex items-center mb-4">
+            <img src="img/vuong.jpg" alt="Hoàng Quốc Vương" class="rounded-full w-12 h-12 mr-4">
+            <div>
+                <h4 class="font-semibold">Hoàng Quốc Vương</h4>
+                <p class="text-purple-200 text-sm">Lớp trưởng</p>
             </div>
+            </div>
+            <p class="italic">"jjj."</p>
         </div>
+
+        <!-- HS 2 -->
+        <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm hover:scale-105 transition">
+            <div class="flex items-center mb-4">
+            <img src="img/vankhanh.jpg" alt="Trần Vân Khánh" class="rounded-full w-12 h-12 mr-4">
+            <div>
+                <h4 class="font-semibold">Trần Vân Khánh</h4>
+                <p class="text-purple-200 text-sm">Thành viên</p>
+            </div>
+            </div>
+            <p class="italic">"hehe."</p>
+        </div>
+
+        <!-- HS 3 -->
+        <div class="bg-white bg-opacity-10 p-6 rounded-xl backdrop-blur-sm hover:scale-105 transition">
+            <div class="flex items-center mb-4">
+            <img src="img/tien.jpg" alt="Hoàng Mạnh Tiến" class="rounded-full w-12 h-12 mr-4">
+            <div>
+                <h4 class="font-semibold">Hoàng Mạnh Tiến</h4>
+                <p class="text-purple-200 text-sm">Thành viên</p>
+            </div>
+            </div>
+            <p class="italic">"ezzz."</p>
+        </div>
+
+        </div>
+    </div>
     </section>
 
     <!-- Footer -->
@@ -365,11 +418,19 @@
                     </div>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                <p>© 2025 Lớp 10A2-K26, Trường THPT Quế Lâm.</p>
-                <p class="text-gray-400 mb-2">
-                    Website made by <a href="https://www.facebook.com/le.trung.kien.2k10/" target="_blank" rel="noopener noreferrer" class="hover:underline text-blue-400">Kiên</a> with 💖
-                </p>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p class="text-gray-400 mb-2">© 2025 Lớp 10A2-K26, Trường THPT Quế Lâm.</p>
+            <p class="text-purple-400 font-medium flex items-center justify-center gap-2">
+                Made with 
+                <span class="animate-pulse text-pink-400">💖</span> 
+                by 
+                <a href="https://www.facebook.com/le.trung.kien.2k10/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="hover:underline text-blue-400 font-semibold">
+                Kiên
+                </a>
+            </p>
             </div>
         </div>
     </footer>
@@ -439,6 +500,20 @@
     <div id="successToast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center hidden z-50" data-aos="fade-left">
         <i data-feather="check-circle" class="mr-2"></i>
         <span>Upload ảnh thành công!</span>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[2000] hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 max-w-md w-11/12 relative">
+            <button onclick="closeStudentModal()" class="absolute top-3 right-3 text-gray-600 dark:text-gray-300 hover:text-red-500">
+            <i data-feather="x"></i>
+            </button>
+            <div class="text-center">
+            <img id="studentModalImg" src="" alt="Học sinh" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-purple-500">
+            <h3 id="studentModalName" class="text-2xl font-bold text-gray-800 dark:text-white mb-2"></h3>
+            <p id="studentModalRole" class="text-purple-600 dark:text-purple-300 font-medium"></p>
+            </div>
+        </div>
     </div>
 
     <!-- Dark Mode Button -->
@@ -542,11 +617,18 @@
             document.getElementById('fileName').classList.add('hidden');
         }
         
-        // File input display
+        // File input display + validate size
         document.getElementById('imageFile').addEventListener('change', function(e) {
             const fileNameElement = document.getElementById('fileName');
             if (this.files.length > 0) {
-                fileNameElement.textContent = this.files[0].name;
+                const file = this.files[0];
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    alert("⚠️ Ảnh vượt quá 5MB. Vui lòng chọn file nhỏ hơn.");
+                    this.value = ""; // reset input
+                    fileNameElement.classList.add('hidden');
+                    return;
+                }
+                fileNameElement.textContent = file.name + ` (${(file.size/1024/1024).toFixed(2)} MB)`;
                 fileNameElement.classList.remove('hidden');
             } else {
                 fileNameElement.classList.add('hidden');
@@ -865,8 +947,10 @@
             studentContainer.innerHTML += `
                 <div class="student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderColor ? 'border-l-4 ' + borderColor : ''}" data-role="${student.role.join(' ')}">
                     <div class="h-48 w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                        <img src="${student.img}" alt="${student.name}" class="h-full w-full object-cover"
-                            onerror="this.src='${defaultImg}';">
+                        <img src="${student.img}" alt="${student.name}" 
+                            class="h-full w-full object-cover"
+                            onerror="this.src='${defaultImg}';"
+                            loading="lazy">
                     </div>
                     <div class="p-5">
                         <h3 class="font-bold text-lg">${student.name}</h3>
@@ -957,16 +1041,12 @@
 
         // Pagination setup
         let currentPage = 1;
-        const itemsPerPage = 8; // số ảnh trên 1 trang (có thể chỉnh)
-        function renderPagination() {
-            const memories = Array.from(document.querySelectorAll('.memory-card'))
-                .filter(mem => mem.dataset.type !== "guide");
-            const totalItems = memories.length;
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const itemsPerPage = 8; // số ảnh trên 1 trang
+        let filteredMemories = []; // danh sách sau khi lọc
+        function renderPagination(totalPages) {
             const pagination = document.getElementById('pagination');
             pagination.innerHTML = '';
 
-            // Nếu chỉ có 1 trang hoặc không có ảnh → ẩn pagination
             if (totalPages <= 1) {
                 pagination.style.display = 'none';
                 return;
@@ -974,7 +1054,7 @@
                 pagination.style.display = 'flex';
             }
 
-            // Nút Prev
+            // Prev
             const prevBtn = document.createElement('button');
             prevBtn.textContent = '«';
             prevBtn.className = `px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
@@ -987,7 +1067,7 @@
             };
             pagination.appendChild(prevBtn);
 
-            // Nút số trang
+            // Numbers
             for (let i = 1; i <= totalPages; i++) {
                 const button = document.createElement('button');
                 button.textContent = i;
@@ -999,7 +1079,7 @@
                 pagination.appendChild(button);
             }
 
-            // Nút Next
+            // Next
             const nextBtn = document.createElement('button');
             nextBtn.textContent = '»';
             nextBtn.className = `px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
@@ -1014,22 +1094,21 @@
         }
 
         function showPage(page) {
-            const memories = Array.from(document.querySelectorAll('.memory-card'))
-                .filter(mem => mem.dataset.type !== "guide");
+            const memories = filteredMemories.length > 0 
+                ? filteredMemories 
+                : Array.from(document.querySelectorAll('.memory-card')).filter(mem => mem.dataset.type !== "guide");
+
             const totalItems = memories.length;
             const totalPages = Math.ceil(totalItems / itemsPerPage);
 
             memories.forEach((item, index) => {
-                // Ẩn tất cả trước
                 item.style.display = 'none';
-
-                // Chỉ hiện các ảnh của trang hiện tại
                 if (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) {
                     item.style.display = 'block';
                 }
             });
 
-            renderPagination(); // Không truyền tham số
+            renderPagination(totalPages);
         }
 
         // Khởi tạo phân trang sau khi load
@@ -1044,35 +1123,80 @@
             let memories = Array.from(document.querySelectorAll('.memory-card'))
                 .filter(mem => mem.dataset.type !== "guide");
 
-            // Lọc theo tiêu đề
-            memories.forEach(mem => {
+            // Lọc
+            memories = memories.filter(mem => {
                 const title = mem.querySelector('.memory-title').textContent.toLowerCase();
-                mem.style.display = title.includes(searchText) ? 'block' : 'none';
+                return title.includes(searchText);
             });
 
             // Sắp xếp
             const sortValue = sortSelect.value;
-            let sorted = memories.filter(mem => mem.style.display !== 'none');
-            sorted.sort((a, b) => {
+            memories.sort((a, b) => {
                 if (sortValue === 'title') {
                     return a.querySelector('.memory-title').textContent.localeCompare(
                         b.querySelector('.memory-title').textContent);
                 } else if (sortValue === 'newest') {
-                    return b.dataset.id - a.dataset.id; // id là timestamp
+                    return b.dataset.id - a.dataset.id;
                 } else if (sortValue === 'oldest') {
                     return a.dataset.id - b.dataset.id;
                 }
             });
 
+            // Gán lại danh sách đã lọc
+            filteredMemories = memories;
+
             // Render lại
             const grid = document.querySelector('.memory-grid');
-            sorted.forEach(mem => grid.appendChild(mem));
+            grid.innerHTML = '';
+            memories.forEach(mem => grid.appendChild(mem));
 
-            showPage(1); // reset về trang 1
+            currentPage = 1;
+            showPage(currentPage);
         }
 
         searchInput.addEventListener('input', filterAndSortMemories);
         sortSelect.addEventListener('change', filterAndSortMemories);
+
+        // Student Modal Functions
+        function openStudentModal(name, img, roleText) {
+        document.getElementById('studentModalImg').src = img;
+        document.getElementById('studentModalName').textContent = name;
+        document.getElementById('studentModalRole').textContent = roleText;
+        document.getElementById('studentModal').classList.remove('hidden');
+        feather.replace();
+        }
+
+        function closeStudentModal() {
+        document.getElementById('studentModal').classList.add('hidden');
+        }
+
+        // Gán sự kiện click cho mỗi student-card
+        document.addEventListener('click', function(e) {
+        const card = e.target.closest('.student-card');
+        if (card) {
+            const name = card.querySelector('h3').textContent;
+            const img = card.querySelector('img').src;
+            const roleBadges = Array.from(card.querySelectorAll('.role-badge'))
+                                    .map(b => b.textContent)
+                                    .join(', ');
+            openStudentModal(name, img, roleBadges);
+        }
+        });
+
+        // Smooth scroll with offset (để không bị che bởi navbar)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href').substring(1);
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+            e.preventDefault();
+            const yOffset = -80; // cao khoảng navbar
+            const y = targetEl.getBoundingClientRect().top + window.scrollY + yOffset;
+
+            window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+        });
     </script>
 </body>
 </html>

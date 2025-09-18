@@ -253,3 +253,84 @@ body.dark .shadow-md, body.dark .shadow-lg {
   border-color: #7b2ff7;
   box-shadow: 0 0 0 3px rgba(123, 47, 247, 0.2);
 }
+/* Pagination */
+#pagination button {
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+#pagination button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(123,47,247,0.2);
+}
+
+#pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* ==== DARK MODE ==== */
+body.dark {
+  background-color: #1a1a1a;
+  color: #e5e5e5;
+}
+
+/* Memories Search + Sort box */
+body.dark #memories .bg-white {
+  background-color: #2a2a2a !important;
+  border-color: #444 !important;
+}
+body.dark #memories input,
+body.dark #memories select {
+  background-color: #333;
+  color: #e5e5e5;
+  border-color: #555;
+}
+body.dark #memories input::placeholder {
+  color: #aaa;
+}
+
+/* Pagination */
+body.dark #pagination button {
+  background-color: #333;
+  color: #e5e5e5;
+  border: 1px solid #555;
+}
+body.dark #pagination button:hover:not(:disabled) {
+  background-color: #555;
+}
+body.dark #pagination button.bg-purple-600 {
+  background-color: #7c3aed !important; /* nút đang active */
+}
+
+/* Memory Card Overlay */
+body.dark .memory-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: #f3f3f3;
+}
+/* Student Cards */
+body.dark .student-card {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+body.dark .student-card h3 {
+  color: #fff;
+}
+body.dark .student-card .role-badge {
+  background-color: #444;
+  color: #ddd;
+}
+/* Student card hover */
+.student-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+.student-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+html {
+  scroll-behavior: smooth;
+}
