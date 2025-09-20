@@ -1,7 +1,10 @@
 // functions/upload-image.js
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed" })
+    };
   }
 
   try {
@@ -29,7 +32,12 @@ export async function handler(event) {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(JSON.stringify(data));
+    if (!res.ok) {
+      return {
+        statusCode: res.status,
+        body: JSON.stringify({ error: data.message || "Upload failed", details: data })
+      };
+    }
 
     return {
       statusCode: 200,
@@ -40,6 +48,9 @@ export async function handler(event) {
       }),
     };
   } catch (err) {
-    return { statusCode: 500, body: err.toString() };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message || "Unexpected server error" })
+    };
   }
 }
