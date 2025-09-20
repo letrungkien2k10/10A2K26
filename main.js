@@ -27,6 +27,7 @@ async function loadMemories() {
         const resp = await fetch('/.netlify/functions/get-memories');
         if (!resp.ok) throw new Error('Failed to load memories');
         const memories = await resp.json();
+        console.log('Memories data from API:', memories); // Debug dữ liệu từ API
 
         const grid = document.querySelector('.memory-grid');
         grid.innerHTML = '';
@@ -34,11 +35,11 @@ async function loadMemories() {
         memories.forEach(mem => {
             const memoryCard = document.createElement('div');
             memoryCard.className = 'memory-card';
-            memoryCard.dataset.path = mem.path; // Use path for delete reference
+            memoryCard.dataset.path = mem.path;
             memoryCard.innerHTML = `
                 <img src="${mem.url}" alt="${mem.title}" class="memory-img">
                 <div class="memory-overlay">
-                    <h3 class="memory-title">${mem.title}</h3>
+                    <h3 class="memory-title">${mem.title}</h3> <!-- Render trực tiếp -->
                     <p class="memory-date">${new Date(mem.date).toLocaleDateString('vi-VN')}</p>
                 </div>
                 <div class="memory-actions" style="display: ${isAuthenticated ? 'flex' : 'none'};">
@@ -50,10 +51,10 @@ async function loadMemories() {
         });
 
         feather.replace();
-        filterAndSortMemories(); // Apply search/sort/pagination
+        filterAndSortMemories();
     } catch (err) {
         console.error('Load memories error:', err);
-        // Fallback to existing static memories if any
+        showSuccessToast("Lỗi load kỷ niệm: " + err.message, true);
     }
 }
 
