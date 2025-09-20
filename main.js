@@ -200,24 +200,29 @@ function uploadImage() {
         }
 
         // Delete memory function
-        function deleteMemory(id) {
-            if (!isAuthenticated) {
-                showSuccessToast("Vui lòng đăng nhập để thực hiện!");
-                openPasswordModal();
-                return;
-            }
+        async function deleteMemory(id, path) {
+        if (!isAuthenticated) {
+            showSuccessToast("Vui lòng đăng nhập để thực hiện!");
+            openPasswordModal();
+            return;
+        }
 
-            if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
-                const memoryItem = document.querySelector(`.memory-card[data-id="${id}"]`);
-                if (memoryItem) {
-                    memoryItem.classList.add('opacity-0', 'scale-95');
-                    setTimeout(() => {
-                        memoryItem.remove();
-                        showSuccessToast("Đã xóa ảnh thành công!");
-                        showPage(currentPage);
-                    }, 300);
-                }
+        if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
+            try {
+            const resp = await fetch('/.netlify/functions/delete-image', {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ path })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || "Xóa thất bại");
+
+            document.querySelector(`.memory-card[data-id="${id}"]`)?.remove();
+            showSuccessToast("Đã xóa ảnh thành công!");
+            } catch (err) {
+            alert("❌ Lỗi khi xóa ảnh: " + err.message);
             }
+        }
         }
 
         // Edit memory function
