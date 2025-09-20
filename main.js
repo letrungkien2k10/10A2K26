@@ -113,58 +113,69 @@
             }
         });
         
-// ================== UPLOAD IMAGE ==================
-function uploadImage() {
-  const title = document.getElementById('imageTitle').value;
-  const date = document.getElementById('imageDate').value;
-  const file = document.getElementById('imageFile').files[0];
+        // Upload function (simulated)
+        function uploadImage() {
+            const title = document.getElementById('imageTitle').value;
+            const date = document.getElementById('imageDate').value;
+            const file = document.getElementById('imageFile').files[0];
+            const isEditing = document.getElementById('uploadForm').dataset.editing;
+            
+            if (!title || !date) {
+                alert('Vui lòng điền đầy đủ thông tin!');
+                return;
+            }
 
-  if (!title || !date || !file) {
-    alert('⚠️ Vui lòng nhập đầy đủ thông tin và chọn ảnh!');
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onloadend = async () => {
-    const base64 = reader.result.split(',')[1];
-
-    try {
-      const resp = await fetch('/.netlify/functions/upload-image', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          date,
-          filename: file.name,
-          contentBase64: base64,
-        }),
-      });
-
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || "Upload lỗi");
-
-      // ✅ Thêm ảnh mới vào web ngay mà không cần reload
-      const newMemory = document.createElement('div');
-      newMemory.className = 'memory-card';
-      newMemory.innerHTML = `
-        <img src="${data.url}" alt="${title}" class="memory-img">
-        <div class="memory-overlay">
-          <h3 class="memory-title">${title}</h3>
-          <p class="memory-date">${new Date(date).toLocaleDateString('vi-VN')}</p>
-        </div>
-      `;
-      document.querySelector('.memory-grid').prepend(newMemory);
-
-      closeUploadModal();
-      showSuccessToast("Thêm ảnh thành công!");
-      feather.replace();
-    } catch (err) {
-      alert("❌ Có lỗi khi upload: " + err.message);
-    }
-  };
-
-  reader.readAsDataURL(file);
-}
+            if (!isEditing && !file) {
+                alert('Vui lòng chọn ảnh!');
+                return;
+            }
+            
+            // Simulate upload (in a real app, you would upload to a server here)
+            setTimeout(() => {
+                closeUploadModal();
+                showSuccessToast();
+                
+                if (isEditing) {
+                    // Update existing memory
+                    const memoryItem = document.querySelector(`.memory-card[data-id="${isEditing}"]`);
+                    if (memoryItem) {
+                        memoryItem.querySelector('h3').textContent = title;
+                        memoryItem.querySelector('p').textContent = new Date(date).toLocaleDateString('vi-VN');
+                        if (file) {
+                            memoryItem.querySelector('img').src = URL.createObjectURL(file);
+                        }
+                    }
+                    showSuccessToast("Cập nhật ảnh thành công!");
+                } else {
+                    // Add new memory
+                    const memoryId = Date.now();
+                    const newMemory = document.createElement('div');
+                    newMemory.className = 'memory-card';
+                    newMemory.dataset.id = memoryId;
+                    newMemory.innerHTML = `
+                        <img src="${URL.createObjectURL(file)}" alt="${title}" class="memory-img">
+                        <div class="memory-overlay">
+                            <h3 class="memory-title">${title}</h3>
+                            <p class="memory-date">${new Date(date).toLocaleDateString('vi-VN')}</p>
+                        </div>
+                        <div class="memory-actions">
+                            <button class="memory-action-btn edit-btn" onclick="editMemory(${memoryId})">
+                                <i data-feather="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button class="memory-action-btn delete-btn">
+                                <i data-feather="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    document.querySelector('.memory-grid').prepend(newMemory);
+                    showSuccessToast("Thêm ảnh thành công!");
+                }
+                
+                feather.replace();
+                document.getElementById('uploadForm').removeAttribute('data-editing');
+                showPage(currentPage);
+            }, 1500);
+        }
         
         function showSuccessToast(message = "Upload ảnh thành công!") {
             const toast = document.getElementById('successToast');
@@ -200,29 +211,24 @@ function uploadImage() {
         }
 
         // Delete memory function
-        async function deleteMemory(id, path) {
-        if (!isAuthenticated) {
-            showSuccessToast("Vui lòng đăng nhập để thực hiện!");
-            openPasswordModal();
-            return;
-        }
-
-        if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
-            try {
-            const resp = await fetch('/.netlify/functions/delete-image', {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ path })
-            });
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.error || "Xóa thất bại");
-
-            document.querySelector(`.memory-card[data-id="${id}"]`)?.remove();
-            showSuccessToast("Đã xóa ảnh thành công!");
-            } catch (err) {
-            alert("❌ Lỗi khi xóa ảnh: " + err.message);
+        function deleteMemory(id) {
+            if (!isAuthenticated) {
+                showSuccessToast("Vui lòng đăng nhập để thực hiện!");
+                openPasswordModal();
+                return;
             }
-        }
+
+            if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
+                const memoryItem = document.querySelector(`.memory-card[data-id="${id}"]`);
+                if (memoryItem) {
+                    memoryItem.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        memoryItem.remove();
+                        showSuccessToast("Đã xóa ảnh thành công!");
+                        showPage(currentPage);
+                    }, 300);
+                }
+            }
         }
 
         // Edit memory function
