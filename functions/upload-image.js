@@ -10,12 +10,7 @@ export async function handler(event) {
     const { title, date, filename, contentBase64 } = JSON.parse(event.body);
 
     // Debug để kiểm tra dữ liệu đầu vào
-    console.log('Received title:', title);
-
-    // Encode và decode để đảm bảo UTF-8
-    const encodedTitle = Buffer.from(title, 'utf8').toString('base64');
-    const decodedTitle = Buffer.from(encodedTitle, 'base64').toString('utf8');
-    console.log('Decoded title:', decodedTitle);
+    console.log('Received title (raw):', title);
 
     const user = process.env.GITHUB_USER;
     const repo = process.env.GITHUB_REPO;
@@ -31,10 +26,10 @@ export async function handler(event) {
       method: "PUT",
       headers: {
         Authorization: `token ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
-        message: `Upload ảnh: ${decodedTitle}`,
+        message: `Upload ảnh: ${title}`,
         content: contentBase64,
         branch,
       }),
@@ -62,10 +57,11 @@ export async function handler(event) {
       jsonSha = jsonData.sha;
     } // If not exist, memories = [], no sha (GitHub will create)
 
-    // Add new entry (unshift for newest first)
-    memories.unshift({ title: decodedTitle, date, url: rawUrl, path });
+    // Add new entry (unshift for newest first) with raw title
+    memories.unshift({ title, date, url: rawUrl, path });
 
-    // Put updated json
+    // Put updated json with UTF-8 encoding
+    const newContent = Buffer.from(JSON.stringify(memories, null, 2), 'utf8').toString('base64');
     const putJsonRes = await fetch(jsonUrl, {
       method: "PUT",
       headers: {
@@ -73,8 +69,8 @@ export async function handler(event) {
         "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
-        message: `Add memory: ${decodedTitle}`,
-        content: btoa(JSON.stringify(memories, null, 2)),
+        message: `Add memory: ${title}`,
+        content: newContent,
         sha: jsonSha,
         branch,
       }),
@@ -88,7 +84,7 @@ export async function handler(event) {
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ url: rawUrl, title: decodedTitle, date, path }),
+      body: JSON.stringify({ url: rawUrl, title, date, path }),
     };
   } catch (err) {
     console.error('Upload error:', err);
