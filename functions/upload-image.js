@@ -9,6 +9,14 @@ export async function handler(event) {
   try {
     const { title, date, filename, contentBase64 } = JSON.parse(event.body);
 
+    // Debug để kiểm tra dữ liệu đầu vào
+    console.log('Received title:', title);
+
+    // Encode và decode để đảm bảo UTF-8
+    const encodedTitle = Buffer.from(title, 'utf8').toString('base64');
+    const decodedTitle = Buffer.from(encodedTitle, 'base64').toString('utf8');
+    console.log('Decoded title:', decodedTitle);
+
     const user = process.env.GITHUB_USER;
     const repo = process.env.GITHUB_REPO;
     const branch = process.env.GITHUB_BRANCH || "main";
@@ -26,7 +34,7 @@ export async function handler(event) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: `Upload ảnh: ${title}`,
+        message: `Upload ảnh: ${decodedTitle}`,
         content: contentBase64,
         branch,
       }),
@@ -55,18 +63,18 @@ export async function handler(event) {
     } // If not exist, memories = [], no sha (GitHub will create)
 
     // Add new entry (unshift for newest first)
-    memories.unshift({ title, date, url: rawUrl, path });
+    memories.unshift({ title: decodedTitle, date, url: rawUrl, path });
 
     // Put updated json
     const putJsonRes = await fetch(jsonUrl, {
       method: "PUT",
       headers: {
         Authorization: `token ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
-        message: `Add memory: ${title}`,
-        content: btoa(JSON.stringify(memories)),
+        message: `Add memory: ${decodedTitle}`,
+        content: btoa(JSON.stringify(memories, null, 2)),
         sha: jsonSha,
         branch,
       }),
@@ -79,9 +87,11 @@ export async function handler(event) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ url: rawUrl, title, date, path }),
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify({ url: rawUrl, title: decodedTitle, date, path }),
     };
   } catch (err) {
+    console.error('Upload error:', err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message || "Unexpected server error" })

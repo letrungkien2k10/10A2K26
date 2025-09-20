@@ -17,12 +17,15 @@ export async function handler() {
     }
 
     const content = JSON.parse(atob(data.content));
+    console.log('Fetched content:', content); // Debug
 
     return {
       statusCode: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(content)
     };
   } catch (err) {
+    console.error('Fetch error:', err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message || "Server error" })
