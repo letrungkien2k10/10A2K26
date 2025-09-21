@@ -5,87 +5,32 @@ AOS.init({
 });
 feather.replace();
 
-// Load Netlify Identity SDK
-import { Identity } from 'https://identity.netlify.com/v1/netlify-identity.js';
-
 // Authentication state
 let isAuthenticated = false;
+const correctPassword = "10A2K26"; // Change this to your desired password
 
-// Initialize Identity
-const identity = new Identity();
-identity.on('login', user => {
-    isAuthenticated = true;
-    localStorage.setItem('isAuthenticated', 'true');
-    showMemoryActions();
-    updateUploadButtonUI();
-    loadMemories(1);
-    showSuccessToast("Đăng nhập thành công!");
-});
-
-identity.on('logout', () => {
-    isAuthenticated = false;
-    localStorage.removeItem('isAuthenticated');
-    updateUploadButtonUI();
-    loadMemories(1);
-    document.querySelectorAll('.memory-actions').forEach(el => el.style.display = 'none');
-});
-
+// Check authentication from localStorage on page load
 document.addEventListener('DOMContentLoaded', function() {
-    isAuthenticated = identity.currentUser() !== null;
+    const authStatus = localStorage.getItem('isAuthenticated');
+    isAuthenticated = authStatus === 'true';
     
     if (isAuthenticated) {
         showMemoryActions();
         updateUploadButtonUI();
     }
-    loadMemories(1); // Load ban đầu với page 1
-    applyDarkModePreference();
-    checkCounters();
-    renderStudentList();
+    loadMemories(); // Load memories on page load
 });
 
-function applyDarkModePreference() {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-    const darkMode = localStorage.getItem('darkMode');
-    if (darkMode === 'true') {
-        document.body.classList.add('dark');
-        document.getElementById('darkModeBtn').innerHTML = '<i data-feather="sun"></i>';
-    } else {
-        document.getElementById('darkModeBtn').innerHTML = '<i data-feather="moon"></i>';
-    }
-    feather.replace();
-}
-
-const darkModeBtn = document.getElementById('darkModeBtn');
-darkModeBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    
-    if (document.body.classList.contains('dark')) {
-        localStorage.setItem('darkMode', 'true');
-        darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
-    } else {
-        localStorage.setItem('darkMode', 'false');
-        darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
-    }
-
-    darkModeBtn.classList.add('animate-pulse');
-    setTimeout(() => {
-        darkModeBtn.classList.remove('animate-pulse');
-    }, 300);
-
-    feather.replace();
-});
-
-async function loadMemories(page = 1, limit = 8) {
+// Load memories from server
+async function loadMemories() {
     try {
-        const resp = await fetch(`/.netlify/functions/get-memories?page=${page}&limit=${limit}`);
+        const resp = await fetch('/.netlify/functions/get-memories');
         if (!resp.ok) throw new Error('Failed to load memories');
-        const { data: memories, total, page: currentPage, limit: itemsPerPage } = await resp.json();
-        console.log('Memories data from API:', memories);
+        const memories = await resp.json();
+        console.log('Memories data from API:', memories); // Debug dữ liệu từ API
 
         const grid = document.querySelector('.memory-grid');
-        const fragment = document.createDocumentFragment();
+        grid.innerHTML = '';
 
         memories.forEach(mem => {
             const memoryCard = document.createElement('div');
@@ -94,7 +39,7 @@ async function loadMemories(page = 1, limit = 8) {
             memoryCard.innerHTML = `
                 <img src="${mem.url}" alt="${mem.title}" class="memory-img">
                 <div class="memory-overlay">
-                    <h3 class="memory-title">${mem.title}</h3>
+                    <h3 class="memory-title">${mem.title}</h3> <!-- Render trực tiếp -->
                     <p class="memory-date">${new Date(mem.date).toLocaleDateString('vi-VN')}</p>
                 </div>
                 <div class="memory-actions" style="display: ${isAuthenticated ? 'flex' : 'none'};">
@@ -102,29 +47,15 @@ async function loadMemories(page = 1, limit = 8) {
                     <div class="memory-action-btn delete-btn"><i data-feather="trash-2"></i></div>
                 </div>
             `;
-            fragment.appendChild(memoryCard);
+            grid.appendChild(memoryCard);
         });
 
-        grid.innerHTML = ''; // Xóa nội dung cũ trước khi thêm mới
-        grid.appendChild(fragment);
         feather.replace();
         filterAndSortMemories();
-        setupInfiniteScroll(total, itemsPerPage);
     } catch (err) {
         console.error('Load memories error:', err);
         showSuccessToast("Lỗi load kỷ niệm: " + err.message, true);
     }
-}
-
-function setupInfiniteScroll(total, limit) {
-    const grid = document.querySelector('.memory-grid');
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && grid.children.length < total) {
-            const nextPage = Math.ceil(grid.children.length / limit) + 1;
-            loadMemories(nextPage, limit);
-        }
-    }, { threshold: 0.1 });
-    observer.observe(grid.lastElementChild);
 }
 
 function updateUploadButtonUI() {
@@ -134,32 +65,34 @@ function updateUploadButtonUI() {
     const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
 
     if (isAuthenticated) {
+        // Desktop
         uploadBtn.onclick = openUploadModal;
         uploadBtn.innerHTML = '<i data-feather="upload" class="mr-2"></i> Upload ảnh';
-        logoutBtn.onclick = () => identity.logout();
         logoutBtn.classList.remove('hidden');
 
+        // Mobile
         mobileUploadBtn.onclick = openUploadModal;
         mobileUploadBtn.innerHTML = '<i data-feather="upload" class="mr-2"></i> Upload ảnh';
-        mobileLogoutBtn.onclick = () => identity.logout();
         mobileLogoutBtn.classList.remove('hidden');
     } else {
+        // Desktop
         uploadBtn.onclick = openPasswordModal;
-        uploadBtn.innerHTML = '<i data-feather="lock" class="mr-2"></i> Đăng nhập';
+        uploadBtn.innerHTML = '<i data-feather="lock" class="mr-2"></i> Nhập mật khẩu';
         logoutBtn.classList.add('hidden');
 
+        // Mobile
         mobileUploadBtn.onclick = openPasswordModal;
-        mobileUploadBtn.innerHTML = '<i data-feather="lock" class="mr-2"></i> Đăng nhập';
+        mobileUploadBtn.innerHTML = '<i data-feather="lock" class="mr-2"></i> Nhập mật khẩu';
         mobileLogoutBtn.classList.add('hidden');
     }
     feather.replace();
 }
 
 function openPasswordModal() {
-    if (!isAuthenticated) {
-        identity.open();
-    } else {
+    if (isAuthenticated) {
         openUploadModal();
+    } else {
+        document.getElementById('passwordModal').classList.remove('hidden');
     }
 }
 
@@ -169,6 +102,28 @@ function closePasswordModal() {
     document.getElementById('passwordInput').value = '';
 }
 
+function checkPassword() {
+    const enteredPassword = document.getElementById('passwordInput').value;
+    const errorElement = document.getElementById('passwordError');
+    
+    if (enteredPassword === correctPassword) {
+        isAuthenticated = true;
+        localStorage.setItem('isAuthenticated', 'true');
+        closePasswordModal();
+        openUploadModal();
+        showMemoryActions();
+        updateUploadButtonUI();
+        loadMemories(); // Reload to show actions
+        showSuccessToast("Đăng nhập thành công!");
+    } else {
+        errorElement.textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+        errorElement.classList.remove('hidden');
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('passwordInput').focus();
+    }
+}
+
+// Upload modal functions
 function openUploadModal() {
     document.getElementById('uploadModal').classList.remove('hidden');
 }
@@ -179,6 +134,7 @@ function closeUploadModal() {
     document.getElementById('fileName').classList.add('hidden');
 }
 
+// File input display + validate size
 document.getElementById('imageFile').addEventListener('change', function(e) {
     const fileNameElement = document.getElementById('fileName');
     if (this.files.length > 0) {
@@ -196,6 +152,7 @@ document.getElementById('imageFile').addEventListener('change', function(e) {
     }
 });
 
+// ================== UPLOAD IMAGE ==================
 function uploadImage() {
     const title = document.getElementById('imageTitle').value;
     const date = document.getElementById('imageDate').value;
@@ -209,18 +166,26 @@ function uploadImage() {
     const reader = new FileReader();
     reader.onloadend = async () => {
         const base64 = reader.result.split(',')[1];
+
         try {
             const resp = await fetch('/.netlify/functions/upload-image', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, date, filename: file.name, contentBase64: base64 })
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title,
+                    date,
+                    filename: file.name,
+                    contentBase64: base64,
+                }),
             });
+
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || "Upload lỗi");
 
+            // ✅ Thêm ảnh mới vào web ngay mà không cần reload
             const newMemory = document.createElement('div');
             newMemory.className = 'memory-card';
-            newMemory.dataset.path = data.path;
+            newMemory.dataset.path = data.path; // Store path for delete
             newMemory.innerHTML = `
                 <img src="${data.url}" alt="${title}" class="memory-img">
                 <div class="memory-overlay">
@@ -237,10 +202,12 @@ function uploadImage() {
             closeUploadModal();
             showSuccessToast("Thêm ảnh thành công!");
             feather.replace();
+            filterAndSortMemories(); // Update pagination
         } catch (err) {
             alert("❌ Có lỗi khi upload: " + err.message);
         }
     };
+
     reader.readAsDataURL(file);
 }
 
@@ -260,8 +227,25 @@ function showMemoryActions() {
             actions.style.display = isAuthenticated ? 'flex' : 'none';
         }
     });
+    
+    // Also update edit/delete buttons in existing memories
+    document.querySelectorAll('.edit-memory-btn, .delete-memory-btn').forEach(btn => {
+        btn.style.display = isAuthenticated ? 'flex' : 'none';
+    });
 }
 
+// Logout function
+function logout() {
+    isAuthenticated = false;
+    localStorage.removeItem('isAuthenticated');
+    showMemoryActions();
+    updateUploadButtonUI();
+    loadMemories(); // Reload to hide actions
+    showSuccessToast("Đã đăng xuất!");
+    closeUploadModal();
+}
+
+// Delete memory function
 async function deleteMemory(path) {
     if (!isAuthenticated) {
         showSuccessToast("Vui lòng đăng nhập để thực hiện!");
@@ -276,15 +260,18 @@ async function deleteMemory(path) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ path })
             });
+
             const data = await resp.json();
             if (!resp.ok) throw new Error(data.error || "Xóa lỗi");
 
+            // Remove from DOM
             const memoryItem = document.querySelector(`.memory-card[data-path="${path}"]`);
             if (memoryItem) {
                 memoryItem.classList.add('opacity-0', 'scale-95');
                 setTimeout(() => {
                     memoryItem.remove();
                     showSuccessToast("Đã xóa ảnh thành công!");
+                    showPage(currentPage);
                 }, 300);
             }
         } catch (err) {
@@ -293,6 +280,7 @@ async function deleteMemory(path) {
     }
 }
 
+// Edit memory function
 function editMemory(path) {
     if (!isAuthenticated) {
         showSuccessToast("Vui lòng đăng nhập để thực hiện!");
@@ -313,6 +301,7 @@ function editMemory(path) {
     }
 }
 
+// Initialize memory actions
 document.addEventListener('click', function(e) {
     if (e.target.closest('.delete-btn')) {
         const memoryItem = e.target.closest('.memory-card');
@@ -324,11 +313,13 @@ document.addEventListener('click', function(e) {
         editMemory(memoryItem.dataset.path);
     }
     
+    // Gán sự kiện click cho tất cả ảnh trong memory-card
     const img = e.target.closest('.memory-img');
     if (img) {
         openImageModal(img.src);
     }
     
+    // Gán sự kiện click cho mỗi student-card
     const card = e.target.closest('.student-card');
     if (card) {
         const name = card.querySelector('h3').textContent;
@@ -340,13 +331,23 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Close modals when clicking outside
 window.onclick = function(event) {
-    if (event.target.id === 'passwordModal') closePasswordModal();
-    if (event.target.id === 'uploadModal') closeUploadModal();
-    if (event.target.id === 'imageModal') closeImageModal();
-    if (event.target.id === 'studentModal') closeStudentModal();
+    if (event.target.id === 'passwordModal') {
+        closePasswordModal();
+    }
+    if (event.target.id === 'uploadModal') {
+        closeUploadModal();
+    }
+    if (event.target.id === 'imageModal') {
+        closeImageModal();
+    }
+    if (event.target.id === 'studentModal') {
+        closeStudentModal();
+    }
 }
 
+// Mobile menu toggle
 const mobileMenuBtn = document.querySelector('.mobile-menu-button');
 const mobileMenu = document.getElementById('mobileMenu');
 if (mobileMenuBtn && mobileMenu) {
@@ -357,7 +358,9 @@ if (mobileMenuBtn && mobileMenu) {
     });
 }
 
+// Scroll to Top (hiệu ứng mượt)
 const scrollTopBtn = document.getElementById('scrollTopBtn');
+
 window.addEventListener('scroll', () => {
     if (window.scrollY > 200) {
         scrollTopBtn.classList.add('show');
@@ -365,10 +368,12 @@ window.addEventListener('scroll', () => {
         scrollTopBtn.classList.remove('show');
     }
 });
+
 scrollTopBtn.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
+// Counter animation nâng cấp: chỉ chạy khi hiện trên màn hình
 function animateCounter(counter) {
     const target = +counter.getAttribute('data-target');
     const duration = 2000;
@@ -380,11 +385,10 @@ function animateCounter(counter) {
     }
     requestAnimationFrame(update);
 }
-
 function checkCounters() {
     document.querySelectorAll('.counter').forEach(counter => {
         const rect = counter.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0 && counter.textContent === '0') {
+        if(rect.top < window.innerHeight && rect.bottom > 0 && counter.textContent === '0') {
             animateCounter(counter);
         }
     });
@@ -392,8 +396,10 @@ function checkCounters() {
 window.addEventListener('scroll', checkCounters);
 window.addEventListener('load', checkCounters);
 
+// Student list generator
 const studentContainer = document.getElementById('student-container');
 
+// Danh sách học sinh (role là mảng)
 const students = [
     { name: 'Hoàng Quốc Vương', role: ['monitor'], img: 'img/vuong.jpg' },
     { name: 'Nguyễn Duy Anh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
@@ -440,92 +446,128 @@ const students = [
     { name: 'Phạm Hà Vy', role: ['member'], img: 'img/hoangquocvuong.jpg' }
 ];
 
-function renderStudentList() {
-    const studentContainer = document.getElementById('student-container');
-    studentContainer.innerHTML = ''; // Clear existing content
+// Render danh sách
+students.forEach((student) => {
+    const defaultImg = 'img/default.jpg';
 
-    students.forEach(student => {
-        const defaultImg = 'img/default.jpg';
+    // Tạo các badge vai trò
+    let roleBadges = '';
+    student.role.forEach(role => {
+        let badgeClass = '';
+        let badgeText = '';
+        
+        if (role === 'monitor') {
+            badgeClass = 'monitor-badge';
+            badgeText = 'Lớp trưởng';
+        } else if (role === 'secretary') {
+            badgeClass = 'secretary-badge';
+            badgeText = 'Thư ký';
+        } else if (role === 'group-leader') {
+            badgeClass = 'group-leader-badge';
+            badgeText = 'Tổ trưởng';
+        } else if (role === 'assistant-arts') {
+            badgeClass = 'assistant-badge';
+            badgeText = 'Lớp phó Văn nghệ';
+        } else if (role === 'deputy-labor') {
+            badgeClass = 'assistant-badge';
+            badgeText = 'Lớp phó Lao động';
+        } else if (role === 'studying') {
+            badgeClass = 'assistant-badge';
+            badgeText = 'Lớp phó Học tập';
+        } else {
+            badgeClass = 'member-badge';
+            badgeText = 'Thành viên';
+        }
+        
+        roleBadges += `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
+    });
 
-        let roleBadges = '';
-        student.role.forEach(role => {
-            let badgeClass = '';
-            let badgeText = '';
-            
-            if (role === 'monitor') {
-                badgeClass = 'monitor-badge';
-                badgeText = 'Lớp trưởng';
-            } else if (role === 'secretary') {
-                badgeClass = 'secretary-badge';
-                badgeText = 'Thư ký';
-            } else if (role === 'group-leader') {
-                badgeClass = 'group-leader-badge';
-                badgeText = 'Tổ trưởng';
-            } else if (role === 'assistant-arts') {
-                badgeClass = 'assistant-badge';
-                badgeText = 'Lớp phó Văn nghệ';
-            } else if (role === 'deputy-labor') {
-                badgeClass = 'assistant-badge';
-                badgeText = 'Lớp phó Lao động';
-            } else if (role === 'studying') {
-                badgeClass = 'assistant-badge';
-                badgeText = 'Lớp phó Học tập';
-            } else {
-                badgeClass = 'member-badge';
-                badgeText = 'Thành viên';
-            }
-            
-            roleBadges += `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
-        });
+    // Xác định màu viền theo vai trò đầu tiên
+    let borderColor = '';
+    if (student.role.includes('monitor')) borderColor = 'border-purple-500';
+    else if (student.role.includes('deputy-labor')) borderColor = 'border-green-500';
+    else if (student.role.includes('studying')) borderColor = 'border-indigo-500';
+    else if (student.role.includes('secretary')) borderColor = 'border-yellow-500';
+    else if (student.role.includes('group-leader')) borderColor = 'border-blue-500';
+    else if (student.role.includes('assistant-arts')) borderColor = 'border-pink-500';
+    // Nếu chỉ là member thì không có border
+    if (student.role.length === 1 && student.role[0] === 'member') borderColor = '';
 
-        let borderColor = '';
-        if (student.role.includes('monitor')) borderColor = 'border-purple-500';
-        else if (student.role.includes('deputy-labor')) borderColor = 'border-green-500';
-        else if (student.role.includes('studying')) borderColor = 'border-indigo-500';
-        else if (student.role.includes('secretary')) borderColor = 'border-yellow-500';
-        else if (student.role.includes('group-leader')) borderColor = 'border-blue-500';
-        else if (student.role.includes('assistant-arts')) borderColor = 'border-pink-500';
-        if (student.role.length === 1 && student.role[0] === 'member') borderColor = '';
-
-        studentContainer.innerHTML += `
-            <div class="student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderColor ? 'border-l-4 ' + borderColor : ''}" data-role="${student.role.join(' ')}">
-                <div class="h-48 w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-                    <img src="${student.img}" alt="${student.name}" 
-                        class="h-full w-full object-cover"
-                        onerror="this.src='${defaultImg}';"
-                        loading="lazy">
-                </div>
-                <div class="p-5">
-                    <h3 class="font-bold text-lg">${student.name}</h3>
-                    <div class="mt-3 flex flex-wrap">
-                        ${roleBadges}
-                    </div>
+    // HTML
+    studentContainer.innerHTML += `
+        <div class="student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderColor ? 'border-l-4 ' + borderColor : ''}" data-role="${student.role.join(' ')}">
+            <div class="h-48 w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+                <img src="${student.img}" alt="${student.name}" 
+                    class="h-full w-full object-cover"
+                    onerror="this.src='${defaultImg}';"
+                    loading="lazy">
+            </div>
+            <div class="p-5">
+                <h3 class="font-bold text-lg">${student.name}</h3>
+                <div class="mt-3 flex flex-wrap">
+                    ${roleBadges}
                 </div>
             </div>
-        `;
-    });
+        </div>
+    `;
+});
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b =>
-                b.classList.remove('active', 'bg-white', 'text-purple-600')
-            );
-            btn.classList.add('active', 'bg-white', 'text-purple-600');
+// Filter students
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b =>
+            b.classList.remove('active', 'bg-white', 'text-purple-600')
+        );
+        btn.classList.add('active', 'bg-white', 'text-purple-600');
 
-            const filter = btn.dataset.filter;
-            document.querySelectorAll('.student-card').forEach(card => {
-                const roles = card.dataset.role.split(' ');
-                if (filter === 'all') {
-                    card.classList.remove('hidden');
-                } else {
-                    const filterRoles = filter.split(' ');
-                    card.classList.toggle('hidden', !filterRoles.some(r => roles.includes(r)));
-                }
-            });
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.student-card').forEach(card => {
+            const roles = card.dataset.role.split(' ');
+            if (filter === 'all') {
+                card.classList.remove('hidden');
+            } else {
+                // Nếu filter chứa nhiều role, kiểm tra từng role
+                const filterRoles = filter.split(' ');
+                card.classList.toggle('hidden', !filterRoles.some(r => roles.includes(r)));
+            }
         });
     });
-}
+});
 
+// Dark mode toggle
+// Enhanced dark mode toggle with animation
+const darkModeBtn = document.getElementById('darkModeBtn');
+darkModeBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    
+    // Lưu trạng thái dark mode
+    if (document.body.classList.contains('dark')) {
+        localStorage.setItem('darkMode', 'true');
+        darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
+    } else {
+        localStorage.setItem('darkMode', 'false');
+        darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+    }
+
+    // Hiệu ứng nút
+    darkModeBtn.classList.add('animate-pulse');
+    setTimeout(() => {
+        darkModeBtn.classList.remove('animate-pulse');
+    }, 300);
+
+    feather.replace();
+});
+
+// Khi load lại trang, áp dụng dark mode nếu có
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark');
+    darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
+} else {
+    darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+}
+feather.replace();
+
+// Open image modal
 function openImageModal(src) {
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
@@ -533,10 +575,130 @@ function openImageModal(src) {
     modal.classList.remove('hidden');
 }
 
+// Close image modal
 function closeImageModal() {
     document.getElementById('imageModal').classList.add('hidden');
 }
 
+// Pagination setup
+let currentPage = 1;
+const itemsPerPage = 8; // số ảnh trên 1 trang
+let filteredMemories = []; // danh sách sau khi lọc
+function renderPagination(totalPages) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+    } else {
+        pagination.style.display = 'flex';
+    }
+
+    // Prev
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '«';
+    prevBtn.className = `px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // Numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+        button.onclick = () => {
+            currentPage = i;
+            showPage(currentPage);
+        };
+        pagination.appendChild(button);
+    }
+
+    // Next
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '»';
+    nextBtn.className = `px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+function showPage(page) {
+    const memories = filteredMemories.length > 0 
+        ? filteredMemories 
+        : Array.from(document.querySelectorAll('.memory-card')).filter(mem => mem.dataset.type !== "guide");
+
+    const totalItems = memories.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    memories.forEach((item, index) => {
+        item.style.display = 'none';
+        if (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) {
+            item.style.display = 'block';
+        }
+    });
+
+    renderPagination(totalPages);
+}
+
+// Khởi tạo phân trang sau khi load
+showPage(currentPage);
+
+// Search & Sort Memories
+const searchInput = document.getElementById('searchMemory');
+const sortSelect = document.getElementById('sortMemory');
+
+function filterAndSortMemories() {
+    const searchText = searchInput.value.toLowerCase();
+    let memories = Array.from(document.querySelectorAll('.memory-card'))
+        .filter(mem => mem.dataset.type !== "guide");
+
+    // Lọc
+    memories = memories.filter(mem => {
+        const title = mem.querySelector('.memory-title').textContent.toLowerCase();
+        return title.includes(searchText);
+    });
+
+    // Sắp xếp
+    const sortValue = sortSelect.value;
+    memories.sort((a, b) => {
+        if (sortValue === 'title') {
+            return a.querySelector('.memory-title').textContent.localeCompare(
+                b.querySelector('.memory-title').textContent);
+        } else if (sortValue === 'newest') {
+            return b.dataset.path.localeCompare(a.dataset.path); // Use path for sorting
+        } else if (sortValue === 'oldest') {
+            return a.dataset.path.localeCompare(b.dataset.path);
+        }
+    });
+
+    // Gán lại danh sách đã lọc
+    filteredMemories = memories;
+
+    // Render lại
+    const grid = document.querySelector('.memory-grid');
+    grid.innerHTML = '';
+    memories.forEach(mem => grid.appendChild(mem));
+
+    currentPage = 1;
+    showPage(currentPage);
+}
+
+searchInput.addEventListener('input', filterAndSortMemories);
+sortSelect.addEventListener('change', filterAndSortMemories);
+
+// Student Modal Functions
 function openStudentModal(name, img, roleText) {
     document.getElementById('studentModalImg').src = img;
     document.getElementById('studentModalName').textContent = name;
@@ -549,51 +711,17 @@ function closeStudentModal() {
     document.getElementById('studentModal').classList.add('hidden');
 }
 
+// Smooth scroll with offset (để không bị che bởi navbar)
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         const targetId = this.getAttribute('href').substring(1);
         const targetEl = document.getElementById(targetId);
         if (targetEl) {
             e.preventDefault();
-            const yOffset = -80;
+            const yOffset = -80; // cao khoảng navbar
             const y = targetEl.getBoundingClientRect().top + window.scrollY + yOffset;
+
             window.scrollTo({ top: y, behavior: 'smooth' });
         }
     });
-});
-
-const searchInput = document.getElementById('searchMemory');
-const sortSelect = document.getElementById('sortMemory');
-
-function filterAndSortMemories() {
-    const searchText = searchInput.value.toLowerCase();
-    let memories = Array.from(document.querySelectorAll('.memory-card'))
-        .filter(mem => mem.dataset.type !== "guide");
-
-    memories = memories.filter(mem => {
-        const title = mem.querySelector('.memory-title').textContent.toLowerCase();
-        return title.includes(searchText);
-    });
-
-    const sortValue = sortSelect.value;
-    memories.sort((a, b) => {
-        if (sortValue === 'title') {
-            return a.querySelector('.memory-title').textContent.localeCompare(
-                b.querySelector('.memory-title').textContent);
-        } else if (sortValue === 'newest') {
-            return b.dataset.path.localeCompare(a.dataset.path);
-        } else if (sortValue === 'oldest') {
-            return a.dataset.path.localeCompare(b.dataset.path);
-        }
-    });
-
-    const grid = document.querySelector('.memory-grid');
-    grid.innerHTML = '';
-    memories.forEach(mem => grid.appendChild(mem));
-}
-
-searchInput.addEventListener('input', filterAndSortMemories);
-sortSelect.addEventListener('change', filterAndSortMemories);
-
-// Khởi tạo ban đầu
-loadMemories(1);
+});        
