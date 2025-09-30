@@ -43,45 +43,87 @@
     <link rel="preload" href="anhlop.png" as="image">
     <link rel="preload" href="style.css" as="style">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="browserconfig" href="browserconfig.xml">
+    
     <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com">
     <link rel="preconnect" href="https://unpkg.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <!-- Open Graph (Facebook, Zalo, v.v.) -->
+    <!-- Universal Meta Tags -->
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Lớp 10A2-K26 THPT Quế Lâm">
+    <meta name="keywords" content="10A2, K26, THPT Quế Lâm, lớp học, học sinh, kỷ niệm">
+    <meta name="theme-color" content="#7b2ff7">
+    
+    <!-- Open Graph - Universal (Facebook, Zalo, WhatsApp, LinkedIn) -->
     <meta property="og:title" content="Lớp 10A2-K26 THPT Quế Lâm - Website chính thức">
     <meta property="og:description" content="Trang web chính thức của lớp 10A2-K26, Trường THPT Quế Lâm. Cập nhật thông tin, hình ảnh, hoạt động và kết nối với thành viên lớp.">
-    <meta property="og:image" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Ảnh tập thể lớp 10A2-K26 THPT Quế Lâm">
     <meta property="og:url" content="https://10a2k26thptquelam.netlify.app">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="10A2-K26 THPT Quế Lâm">
-
+    <meta property="og:locale" content="vi_VN">
+    
+    <!-- Open Graph Images - Multiple formats for compatibility -->
+    <meta property="og:image" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta property="og:image:url" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta property="og:image:secure_url" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Ảnh tập thể lớp 10A2-K26 THPT Quế Lâm">
+    
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@10a2k26thptquelam">
+    <meta name="twitter:creator" content="@10a2k26thptquelam">
     <meta name="twitter:title" content="Lớp 10A2-K26 THPT Quế Lâm - Website chính thức">
     <meta name="twitter:description" content="Trang web chính thức của lớp 10A2-K26. Nơi lưu giữ kỷ niệm và kết nối bạn bè.">
     <meta name="twitter:image" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta name="twitter:image:src" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
     <meta name="twitter:image:alt" content="Ảnh tập thể lớp 10A2-K26 THPT Quế Lâm">
     
-    <!-- Additional meta tags for better sharing -->
-    <meta name="theme-color" content="#7b2ff7">
-    <meta name="msapplication-TileColor" content="#7b2ff7">
-    <meta name="msapplication-TileImage" content="https://10a2k26thptquelam.netlify.app/logo.png">
-    
-    <!-- WhatsApp specific meta tags -->
+    <!-- WhatsApp specific -->
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:secure_url" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    
+    <!-- Zalo specific -->
+    <meta name="image" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta name="thumbnail" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta property="article:author" content="Lớp 10A2-K26 THPT Quế Lâm">
+    <meta property="article:section" content="Education">
+    <meta property="article:tag" content="10A2,K26,THPT Quế Lâm,lớp học">
     
     <!-- LinkedIn specific -->
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     
-    <!-- Additional sharing optimization -->
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="Lớp 10A2-K26 THPT Quế Lâm">
-    <meta name="keywords" content="10A2, K26, THPT Quế Lâm, lớp học, học sinh, kỷ niệm">
+    <!-- Telegram specific -->
+    <meta name="telegram:channel" content="@10a2k26thptquelam">
+    
+    <!-- Discord specific -->
+    <meta property="og:image:type" content="image/png">
+    
+    <!-- Microsoft specific -->
+    <meta name="msapplication-TileColor" content="#7b2ff7">
+    <meta name="msapplication-TileImage" content="https://10a2k26thptquelam.netlify.app/logo.png">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <!-- Apple specific -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="10A2-K26">
+    <link rel="apple-touch-icon" href="https://10a2k26thptquelam.netlify.app/logo.png">
+    
+    <!-- Android specific -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="10A2-K26">
+    
+    <!-- Additional fallbacks -->
+    <meta name="image" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta name="thumbnail" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
+    <meta name="photo" content="https://10a2k26thptquelam.netlify.app/anhlop.png">
 </head>
 <body class="bg-memory min-h-screen">
     <!-- Scroll to Top Button -->
