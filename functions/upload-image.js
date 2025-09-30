@@ -9,13 +9,20 @@ export async function handler(event) {
   try {
     const { title, date, filename, contentBase64 } = JSON.parse(event.body);
 
-    // Debug để kiểm tra dữ liệu đầu vào
-    console.log('Received title (raw):', title);
+    // Validate input data
+    if (!title || !date || !filename || !contentBase64) {
+      throw new Error('Missing required fields: title, date, filename, contentBase64');
+    }
 
     const user = process.env.GITHUB_USER;
     const repo = process.env.GITHUB_REPO;
     const branch = process.env.GITHUB_BRANCH || "main";
     const token = process.env.GITHUB_TOKEN;
+
+    // Validate required environment variables
+    if (!user || !repo || !token) {
+      throw new Error('Missing required environment variables: GITHUB_USER, GITHUB_REPO, GITHUB_TOKEN');
+    }
 
     const timestamp = Date.now();
     const path = `img/memories/${timestamp}_${filename}`;

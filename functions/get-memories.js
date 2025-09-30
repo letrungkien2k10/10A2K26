@@ -4,6 +4,11 @@ export async function handler(event) {
         const repo = process.env.GITHUB_REPO;
         const branch = process.env.GITHUB_BRANCH || "main";
         const token = process.env.GITHUB_TOKEN;
+
+        // Validate required environment variables
+        if (!user || !repo || !token) {
+            throw new Error('Missing required environment variables: GITHUB_USER, GITHUB_REPO, GITHUB_TOKEN');
+        }
         const jsonPath = "data/memories.json";
 
         const url = `https://api.github.com/repos/${user}/${repo}/contents/${jsonPath}?ref=${branch}`;
@@ -24,17 +29,19 @@ export async function handler(event) {
         const limit = parseInt(event.queryStringParameters.limit) || 20;
         const start = (page - 1) * limit;
         const end = start + limit;
+
         const paginatedContent = content.slice(start, end);
 
         return {
-            statusCode: 200,
-            headers: { "Content-Type": "application/json; charset=utf-8" },
-            body: JSON.stringify({
-                data: paginatedContent,
-                total: content.length,
-                page,
-                limit
-            })
+        statusCode: 200,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({ 
+            data: paginatedContent, 
+            total: content.length,
+            page: page,
+            limit: limit,
+            totalPages: Math.ceil(content.length / limit)
+        })
         };
     } catch (err) {
         console.error('Fetch error:', err);

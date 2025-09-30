@@ -14,6 +14,11 @@ export async function handler(event) {
     const branch = process.env.GITHUB_BRANCH || "main";
     const token = process.env.GITHUB_TOKEN;
 
+    // Validate required environment variables
+    if (!user || !repo || !token) {
+      throw new Error('Missing required environment variables: GITHUB_USER, GITHUB_REPO, GITHUB_TOKEN');
+    }
+
     // Get current memories.json
     const jsonPath = "data/memories.json";
     const jsonUrl = `https://api.github.com/repos/${user}/${repo}/contents/${jsonPath}?ref=${branch}`;
