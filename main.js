@@ -8,13 +8,13 @@ const correctPassword = "10A2K26"; // TODO: Move to environment variable for pro
 let lastUploadTime = 0;
 const UPLOAD_COOLDOWN = 5000; // 5 seconds between uploads
 
-// Pagination and filter state
+// Pagination and filter state for memories
 let currentPage = 1;
 let filteredMemories = [];
 let allMemoryElements = []; // Original list of DOM elements for filter/sort
 const itemsPerPage = 20;
 
-// No results div
+// No results div for memories
 let noResultsDiv = null;
 
 // Input sanitization function
@@ -818,10 +818,31 @@ const students = [
     { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg' }
 ];
 
-// Helper: Lấy text role cho badge
+// Students state
+let sortedStudents = [];
+let currentFilter = 'all';
+
+// Role priority map (từ cao xuống thấp: monitor > secretary > studying/deputy-labor > group-leader > member)
+const rolePriority = {
+    'monitor': 5,
+    'secretary': 4,
+    'studying': 3,
+    'deputy-labor': 3,
+    'group-leader-1': 2,
+    'group-leader-2': 2,
+    'group-leader-3': 2,
+    'member': 1
+};
+
+// Helper: Lấy primary role (role đầu tiên trong mảng)
+function getPrimaryRole(student) {
+    return student.role && student.role.length > 0 ? student.role[0] : 'member';
+}
+
+// Helper: Lấy text role cho badge (thay 'monitor' thành 'Lớp trưởng')
 function getRoleText(role) {
     const texts = {
-        'monitor': 'Cờ đỏ',
+        'monitor': 'Lớp trưởng',
         'secretary': 'Thư ký lớp',
         'studying': 'Phó học tập',
         'deputy-labor': 'Phó lao động',
@@ -833,14 +854,17 @@ function getRoleText(role) {
     return texts[role] || 'Thành viên';
 }
 
-// Luôn sort alphabet theo name (A-Z tiếng Việt), nhưng giữ filter
-let sortedStudents = [];
-let currentFilter = 'all'; // Để filter
-
-// Function để render students với sort & filter
+// Function để render students với sort theo role priority + alphabet
 function renderStudents(studentsToRender = students) {
-    // Sort alphabet theo name (A-Z, tiếng Việt)
-    sortedStudents = [...studentsToRender].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    // Sort: Đầu tiên theo role priority (cao xuống thấp), rồi alphabet name trong role
+    sortedStudents = [...studentsToRender].sort((a, b) => {
+        const priorityA = rolePriority[getPrimaryRole(a)] || 1;
+        const priorityB = rolePriority[getPrimaryRole(b)] || 1;
+        if (priorityA !== priorityB) {
+            return priorityB - priorityA; // Cao xuống thấp
+        }
+        return a.name.localeCompare(b.name, 'vi'); // Alphabet trong role
+    });
 
     const studentContainer = document.getElementById('student-container');
     if (!studentContainer) {
@@ -956,11 +980,297 @@ function openStudentModal(name, img, badgesHtml) {
     feather.replace();
 }
 
-// Initial render và filter (thêm vào DOMContentLoaded nếu chưa có)
-document.addEventListener('DOMContentLoaded', () => {
-    renderStudents(); // Render ban đầu với sort
+// Input sanitization function
+function sanitizeInput(input) {
+    return input.trim().replace(/[<>]/g, '');
+}
 
-    // Filter students while maintaining sort order
+// XSS protection for user inputs
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+// Check if user can upload (rate limiting)
+function canUpload() {
+    const now = Date.now();
+    if (now - lastUploadTime < UPLOAD_COOLDOWN) {
+        const remainingTime = Math.ceil((UPLOAD_COOLDOWN - (now - lastUploadTime)) / 1000);
+        showErrorToast(`Vui lòng đợi ${remainingTime} giây trước khi upload tiếp!`);
+        return false;
+    }
+    return true;
+}
+
+// Image lazy loading with intersection observer
+function setupLazyLoading() {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.classList.add('fade-in');
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '50px 0px',
+            threshold: 0.1
+        });
+
+        images.forEach(img => imageObserver.observe(img));
+    }
+}
+
+// Create no results div for memories
+function createNoResultsDiv() {
+    noResultsDiv = document.createElement('div');
+    noResultsDiv.className = 'col-span-full text-center py-12';
+    noResultsDiv.innerHTML = `
+        <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Không tìm thấy kết quả</h3>
+        <p class="text-gray-500">Hãy thử từ khóa khác!</p>
+    `;
+    noResultsDiv.style.display = 'none';
+    return noResultsDiv;
+}
+
+// Apply filter and sort for memories
+function applyFilterAndSort() {
+    const searchText = document.getElementById('searchMemory') ? document.getElementById('searchMemory').value.toLowerCase() : '';
+    const sortValue = document.getElementById('sortMemory') ? document.getElementById('sortMemory').value : 'newest';
+
+    let filtered = [...allMemoryElements].filter(mem => {
+        const title = mem.querySelector('.memory-title').textContent.toLowerCase();
+        return title.includes(searchText);
+    });
+
+    filtered.sort((a, b) => {
+        if (sortValue === 'title') {
+            return a.querySelector('.memory-title').textContent.localeCompare(b.querySelector('.memory-title').textContent);
+        } else if (sortValue === 'newest') {
+            return b.dataset.path.localeCompare(a.dataset.path);
+        } else if (sortValue === 'oldest') {
+            return a.dataset.path.localeCompare(b.dataset.path);
+        }
+        return 0;
+    });
+
+    filteredMemories = filtered;
+
+    allMemoryElements.forEach(el => el.style.display = 'none');
+
+    if (filtered.length === 0) {
+        if (!noResultsDiv) {
+            const grid = document.querySelector('.memory-grid');
+            grid.appendChild(createNoResultsDiv());
+        }
+        noResultsDiv.style.display = 'block';
+        renderPagination(1);
+        return;
+    } else if (noResultsDiv) {
+        noResultsDiv.style.display = 'none';
+    }
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const paginated = filtered.slice(start, end);
+    paginated.forEach(el => el.style.display = 'block');
+
+    renderPagination(totalPages);
+}
+
+// Render pagination for memories
+function renderPagination(totalPages) {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // Prev button
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '«';
+    prevBtn.className = `px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; applyFilterAndSort(); } };
+    pagination.appendChild(prevBtn);
+
+    // Page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+        button.onclick = () => { currentPage = i; applyFilterAndSort(); };
+        pagination.appendChild(button);
+    }
+
+    // Next button
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '»';
+    nextBtn.className = `px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; applyFilterAndSort(); } };
+    pagination.appendChild(nextBtn);
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Load memories from server
+async function loadMemories() {
+    try {
+        showLoadingState(true);
+        const resp = await fetch('/.netlify/functions/get-memories');
+        if (!resp.ok) {
+            const errorData = await resp.json().catch(() => ({ error: 'Unknown error' }));
+            throw new Error(errorData.error || `HTTP ${resp.status}: Failed to load memories`);
+        }
+
+        const responseData = await resp.json();
+        const { data: memories, total } = responseData || {};
+        
+        if (!Array.isArray(memories)) {
+            throw new Error('Invalid response format from server');
+        }
+
+        const grid = document.querySelector('.memory-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        if (memories.length === 0) {
+            grid.appendChild(createNoResultsDiv());
+            noResultsDiv.innerHTML = `
+                <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Chưa có ảnh kỷ niệm</h3>
+                <p class="text-gray-500">Hãy upload ảnh đầu tiên để bắt đầu!</p>
+            `;
+            noResultsDiv.style.display = 'block';
+            feather.replace();
+            return;
+        }
+
+        allMemoryElements = [];
+        memories.forEach(mem => {
+            const memoryCard = document.createElement('div');
+            memoryCard.className = 'memory-card';
+            memoryCard.dataset.path = mem.path;
+            memoryCard.style.display = 'none';
+            memoryCard.innerHTML = `
+                <img src="${mem.url}" alt="${mem.title}" class="memory-img" loading="lazy">
+                <div class="memory-overlay">
+                    <h3 class="memory-title">${escapeHtml(mem.title)}</h3>
+                    <p class="memory-date">${new Date(mem.date).toLocaleDateString('vi-VN')}</p>
+                </div>
+                <div class="memory-actions" style="display: ${isAuthenticated ? 'flex' : 'none'};">
+                    <div class="memory-action-btn edit-btn"><i data-feather="edit"></i></div>
+                    <div class="memory-action-btn delete-btn"><i data-feather="trash-2"></i></div>
+                </div>
+            `;
+            grid.appendChild(memoryCard);
+            allMemoryElements.push(memoryCard);
+        });
+
+        feather.replace();
+        currentPage = 1;
+        applyFilterAndSort();
+
+    } catch (err) {
+        console.error('Load memories error:', err);
+        const grid = document.querySelector('.memory-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i data-feather="alert-triangle" class="w-16 h-16 mx-auto text-red-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-red-600 mb-2">Lỗi tải dữ liệu</h3>
+                    <p class="text-gray-500">Kiểm tra kết nối và thử lại!</p>
+                </div>
+            `;
+            feather.replace();
+        }
+    } finally {
+        showLoadingState(false);
+    }
+}
+
+// Placeholder functions (thêm nếu chưa có)
+function showLoadingState(show) {
+    // Implement loading spinner
+    const loader = document.querySelector('.loader');
+    if (loader) loader.style.display = show ? 'block' : 'none';
+}
+
+function showErrorToast(message) {
+    // Implement toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-red-500 text-white p-4 rounded shadow-lg';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Check authentication from localStorage on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS and Feather Icons first
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    }
+    if (typeof feather !== 'undefined') {
+        feather.replace();
+    }
+    
+    const authStatus = localStorage.getItem('isAuthenticated');
+    isAuthenticated = authStatus === 'true';
+    
+    if (isAuthenticated) {
+        showMemoryActions();
+        updateUploadButtonUI();
+    }
+    
+    // Setup lazy loading
+    setupLazyLoading();
+    
+    // Render students
+    renderStudents();
+    
+    // Load memories after DOM is ready
+    setTimeout(() => {
+        loadMemories();
+    }, 100);
+
+    // Event listeners for search and sort memories
+    const searchInput = document.getElementById('searchMemory');
+    const sortSelect = document.getElementById('sortMemory');
+    if (searchInput && sortSelect) {
+        const debouncedFilter = debounce(applyFilterAndSort, 300);
+        searchInput.addEventListener('input', debouncedFilter);
+        sortSelect.addEventListener('change', applyFilterAndSort);
+    }
+
+    // Filter students
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-btn').forEach(b =>
@@ -980,50 +1290,89 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
-});
 
-// Dark mode toggle
-// Enhanced dark mode toggle with animation
-const darkModeBtn = document.getElementById('darkModeBtn');
-darkModeBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    
-    // Lưu trạng thái dark mode
-    if (document.body.classList.contains('dark')) {
-        localStorage.setItem('darkMode', 'true');
-        darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
-    } else {
-        localStorage.setItem('darkMode', 'false');
-        darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+    // Dark mode toggle
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    if (darkModeBtn) {
+        darkModeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            
+            // Lưu trạng thái dark mode
+            if (document.body.classList.contains('dark')) {
+                localStorage.setItem('darkMode', 'true');
+                darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
+            } else {
+                localStorage.setItem('darkMode', 'false');
+                darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+            }
+
+            // Hiệu ứng nút
+            darkModeBtn.classList.add('animate-pulse');
+            setTimeout(() => {
+                darkModeBtn.classList.remove('animate-pulse');
+            }, 300);
+
+            feather.replace();
+        });
+
+        // Khi load lại trang, áp dụng dark mode nếu có
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark');
+            darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
+        } else {
+            darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
+        }
+        feather.replace();
     }
 
-    // Hiệu ứng nút
-    darkModeBtn.classList.add('animate-pulse');
-    setTimeout(() => {
-        darkModeBtn.classList.remove('animate-pulse');
-    }, 300);
+    // Smooth scroll with offset
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href').substring(1);
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                e.preventDefault();
+                const yOffset = -80; // cao khoảng navbar
+                const y = targetEl.getBoundingClientRect().top + window.scrollY + yOffset;
 
-    feather.replace();
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Placeholder for other functions like showMemoryActions, updateUploadButtonUI
+    function showMemoryActions() {
+        // Show delete/edit buttons if authenticated
+        document.querySelectorAll('.memory-actions').forEach(actions => {
+            actions.style.display = 'flex';
+        });
+    }
+
+    function updateUploadButtonUI() {
+        // Update upload button if authenticated
+        const uploadBtn = document.getElementById('uploadBtn');
+        if (uploadBtn) uploadBtn.classList.remove('hidden');
+    }
+
+    // Open image modal
+    window.openImageModal = function(src) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        if (modal && modalImage) {
+            modalImage.src = src;
+            modal.classList.remove('hidden');
+        }
+    };
+
+    // Close image modal
+    window.closeImageModal = function() {
+        const modal = document.getElementById('imageModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    // Close student modal
+    window.closeStudentModal = function() {
+        const modal = document.getElementById('studentModal');
+        if (modal) modal.classList.add('hidden');
+    };
 });
-
-// Khi load lại trang, áp dụng dark mode nếu có
-if (localStorage.getItem('darkMode') === 'true') {
-    document.body.classList.add('dark');
-    darkModeBtn.innerHTML = '<i data-feather="sun"></i>';
-} else {
-    darkModeBtn.innerHTML = '<i data-feather="moon"></i>';
-}
-feather.replace();
-
-// Open image modal
-function openImageModal(src) {
-    const modal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    modalImage.src = src;
-    modal.classList.remove('hidden');
-}
-
-// Close image modal
-function closeImageModal() {
-    document.getElementById('imageModal').classList.add('hidden');
-}
