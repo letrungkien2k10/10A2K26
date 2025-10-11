@@ -497,3 +497,26 @@ body.dark .student-card h3 {
     border-radius: 1.25rem !important; /* Bo đều các góc */
     overflow: hidden;
 }
+
+/* Dark Mode Button - Always Visible & Mobile Friendly */
+#darkModeBtn {
+    display: flex !important; /* Force visible */
+    bottom: 20px; /* Giảm bottom trên mobile */
+}
+
+#darkModeBtn i {
+    transition: transform 0.3s ease;
+}
+
+#darkModeBtn:hover i {
+    transform: scale(1.1) rotate(10deg); /* Animate icon cute */
+}
+
+@media (max-width: 768px) {
+    #darkModeBtn {
+        bottom: 80px; /* Tránh overlap keyboard mobile */
+        right: 16px;
+        width: 48px;
+        height: 48px; /* Lớn hơn tí cho touch */
+    }
+}

@@ -680,8 +680,8 @@
         </div>
     </div>
 
-    <!-- Dark Mode Button -->
-    <button id="darkModeBtn" class="fixed bottom-20 right-4 z-[1000] bg-purple-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-purple-800 transition-all hover:scale-110 hidden md:flex">
+    <!-- Dark Mode Button - Luôn visible -->
+    <button id="darkModeBtn" class="fixed bottom-20 right-4 z-[1000] bg-purple-600 text-white w-12 h-12 flex items-center justify-center rounded-full shadow-lg hover:bg-purple-800 transition-all hover:scale-110 flex md:flex"> <!-- Thay "hidden md:flex" bằng "flex md:flex" -->
         <i data-feather="moon"></i>
     </button>
     <!-- Scripts -->
