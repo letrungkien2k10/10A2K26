@@ -770,7 +770,7 @@ window.addEventListener('load', checkCounters);
 // Student list generator
 const studentContainer = document.getElementById('student-container');
 
-// Danh sách học sinh (role là mảng)
+// Danh sách học sinh (role là mảng) - Data thực tế
 const students = [
     { name: 'Vũ Kim Huệ', role: ['monitor'], img: 'img/hue.jpg' },
     { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg' },
@@ -818,20 +818,47 @@ const students = [
     { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg' }
 ];
 
-// Luôn giữ nguyên thứ tự gốc
-const sortedStudents = students.slice();
+// Helper: Lấy text role cho badge
+function getRoleText(role) {
+    const texts = {
+        'monitor': 'Cờ đỏ',
+        'secretary': 'Thư ký lớp',
+        'studying': 'Phó học tập',
+        'deputy-labor': 'Phó lao động',
+        'group-leader-1': 'Tổ trưởng 1',
+        'group-leader-2': 'Tổ trưởng 2',
+        'group-leader-3': 'Tổ trưởng 3',
+        'member': 'Thành viên'
+    };
+    return texts[role] || 'Thành viên';
+}
 
-// Function để render students với thứ tự đã sắp xếp
-function renderStudents(studentsToRender = sortedStudents) {
+// Luôn sort alphabet theo name (A-Z tiếng Việt), nhưng giữ filter
+let sortedStudents = [];
+let currentFilter = 'all'; // Để filter
+
+// Function để render students với sort & filter
+function renderStudents(studentsToRender = students) {
+    // Sort alphabet theo name (A-Z, tiếng Việt)
+    sortedStudents = [...studentsToRender].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
     const studentContainer = document.getElementById('student-container');
+    if (!studentContainer) {
+        console.error('Không tìm thấy #student-container!');
+        return;
+    }
     studentContainer.innerHTML = ''; // Clear existing content
+    
+    // Update stats (fix "0 Học sinh")
+    const countEl = document.getElementById('studentCount');
+    if (countEl) countEl.textContent = sortedStudents.length;
     
     // Progressive loading - render in batches
     const batchSize = 8;
     let currentIndex = 0;
     
     function renderBatch() {
-        const batch = studentsToRender.slice(currentIndex, currentIndex + batchSize);
+        const batch = sortedStudents.slice(currentIndex, currentIndex + batchSize); // Dùng sortedStudents
         
         batch.forEach((student, index) => {
             setTimeout(() => {
@@ -841,7 +868,7 @@ function renderStudents(studentsToRender = sortedStudents) {
         
         currentIndex += batchSize;
         
-        if (currentIndex < studentsToRender.length) {
+        if (currentIndex < sortedStudents.length) {
             requestAnimationFrame(renderBatch);
         }
     }
@@ -852,32 +879,26 @@ function renderStudents(studentsToRender = sortedStudents) {
 function renderStudentCard(student, container) {
     const defaultImg = 'img/default.jpg';
 
-    // Badge
+    // Badge (loop mảng)
     let roleBadges = '';
     student.role.forEach(role => {
         let badgeClass = '';
-        let badgeText = '';
+        let badgeText = getRoleText(role);
         if (role === 'monitor') {
-            badgeClass = 'monitor-badge'; badgeText = 'Lớp trưởng';
+            badgeClass = 'monitor-badge'; 
         } else if (role === 'secretary') {
-            badgeClass = 'secretary-badge'; badgeText = 'Thư ký';
-        } else if (role === 'group-leader-1') {
-            badgeClass = 'group-leader-badge'; badgeText = 'Tổ trưởng 1';
-        } else if (role === 'group-leader-2') {
-            badgeClass = 'group-leader-badge'; badgeText = 'Tổ trưởng 2';
-        } else if (role === 'group-leader-3') {
-            badgeClass = 'group-leader-badge'; badgeText = 'Tổ trưởng 3';
-        } else if (role === 'deputy-labor') {
-            badgeClass = 'assistant-badge'; badgeText = 'Lớp phó Lao động';
-        } else if (role === 'studying') {
-            badgeClass = 'assistant-badge'; badgeText = 'Lớp phó Học tập';
+            badgeClass = 'secretary-badge'; 
+        } else if (role === 'group-leader-1' || role === 'group-leader-2' || role === 'group-leader-3') {
+            badgeClass = 'group-leader-badge'; 
+        } else if (role === 'deputy-labor' || role === 'studying') {
+            badgeClass = 'assistant-badge'; 
         } else {
-            badgeClass = 'member-badge'; badgeText = 'Thành viên';
+            badgeClass = 'member-badge'; 
         }
         roleBadges += `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
     });
 
-    // Gradient border class
+    // Gradient border class (sử dụng includes)
     let borderClass = '';
     if (student.role.includes('monitor')) borderClass = 'student-gradient-monitor';
     else if (student.role.includes('deputy-labor')) borderClass = 'student-gradient-labor';
@@ -888,12 +909,18 @@ function renderStudentCard(student, container) {
     // member thì không có viền
     if (student.role.length === 1 && student.role[0] === 'member') borderClass = '';
 
-    // Create card element
+    // Create card element (thêm onclick cho modal)
     const card = document.createElement('div');
     card.className = `student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderClass}`;
     card.setAttribute('data-role', student.role.join(' '));
     card.style.opacity = '0';
     card.style.transform = 'translateY(20px)';
+    card.style.cursor = 'pointer'; // Clickable
+    card.onclick = (e) => {
+        // Tránh click badge
+        if (e.target.classList.contains('role-badge')) return;
+        openStudentModal(student.name, student.img, roleBadges); // Truyền badges cho modal
+    };
     
     card.innerHTML = `
         <div class="h-48 w-full flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
@@ -903,7 +930,7 @@ function renderStudentCard(student, container) {
                 loading="lazy">
         </div>
         <div class="p-5">
-            <h3 class="font-bold text-lg">${student.name}</h3>
+            <h3 class="font-bold text-lg">${escapeHtml(student.name)}</h3>
             <div class="mt-3 flex flex-wrap">
                 ${roleBadges}
             </div>
@@ -920,29 +947,38 @@ function renderStudentCard(student, container) {
     });
 }
 
-// Render danh sách đã sắp xếp
-renderStudents();
+// Function mở modal (nếu chưa có, thêm vào)
+function openStudentModal(name, img, badgesHtml) {
+    document.getElementById('studentModalImg').src = img;
+    document.getElementById('studentModalName').textContent = name;
+    document.getElementById('studentModalRole').innerHTML = badgesHtml; // Hiển thị multiple badges
+    document.getElementById('studentModal').classList.remove('hidden');
+    feather.replace();
+}
 
-// Filter students while maintaining sort order
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b =>
-            b.classList.remove('active', 'bg-white', 'text-purple-600')
-        );
-        btn.classList.add('active', 'bg-white', 'text-purple-600');
+// Initial render và filter (thêm vào DOMContentLoaded nếu chưa có)
+document.addEventListener('DOMContentLoaded', () => {
+    renderStudents(); // Render ban đầu với sort
 
-        const filter = btn.dataset.filter;
-        
-        if (filter === 'all') {
-            // Hiển thị tất cả students theo thứ tự đã sắp xếp
-            renderStudents();
-        } else {
-            // Filter students theo role và giữ nguyên thứ tự
-            const filterRoles = filter.split(' ');
-            // Khi filter
-            const filteredStudents = sortedStudents.filter(student => filterRoles.some(role => student.role.includes(role)));
-            renderStudents(filteredStudents);
-        }
+    // Filter students while maintaining sort order
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b =>
+                b.classList.remove('active', 'bg-white', 'text-purple-600')
+            );
+            btn.classList.add('active', 'bg-white', 'text-purple-600');
+
+            const filter = btn.dataset.filter;
+            
+            if (filter === 'all') {
+                // Hiển thị tất cả students theo thứ tự đã sắp xếp
+                renderStudents();
+            } else {
+                // Filter students theo role và giữ nguyên thứ tự (sử dụng includes cho mảng)
+                const filteredStudents = students.filter(student => student.role.includes(filter));
+                renderStudents(filteredStudents);
+            }
+        });
     });
 });
 
