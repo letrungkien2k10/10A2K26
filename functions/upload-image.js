@@ -14,6 +14,12 @@ export async function handler(event) {
       throw new Error('Missing required fields: title, date, filename, contentBase64');
     }
 
+    // Rough size check (base64 ~1.33x binary)
+    const approxSize = Buffer.from(contentBase64, 'base64').length;
+    if (approxSize > 5 * 1024 * 1024) {
+      throw new Error('File too large: Max 5MB');
+    }
+
     const user = process.env.GITHUB_USER;
     const repo = process.env.GITHUB_REPO;
     const branch = process.env.GITHUB_BRANCH || "main";
@@ -62,12 +68,12 @@ export async function handler(event) {
       const jsonData = await jsonRes.json();
       memories = JSON.parse(atob(jsonData.content));
       jsonSha = jsonData.sha;
-    } // If not exist, memories = [], no sha (GitHub will create)
+    }
 
-    // Add new entry (unshift for newest first) with raw title
+    // Add new entry (unshift for newest first)
     memories.unshift({ title, date, url: rawUrl, path });
 
-    // Put updated json with UTF-8 encoding
+    // Put updated json with explicit UTF-8
     const newContent = Buffer.from(JSON.stringify(memories, null, 2), 'utf8').toString('base64');
     const putJsonRes = await fetch(jsonUrl, {
       method: "PUT",

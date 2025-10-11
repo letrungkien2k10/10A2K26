@@ -24,24 +24,13 @@ export async function handler(event) {
         const content = JSON.parse(atob(data.content));
         console.log('Fetched content:', content);
 
-        // Pagination logic
-        const page = parseInt(event.queryStringParameters.page) || 1;
-        const limit = parseInt(event.queryStringParameters.limit) || 20;
-        const start = (page - 1) * limit;
-        const end = start + limit;
-
-        const paginatedContent = content.slice(start, end);
-
         return {
-        statusCode: 200,
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ 
-            data: paginatedContent, 
-            total: content.length,
-            page: page,
-            limit: limit,
-            totalPages: Math.ceil(content.length / limit)
-        })
+            statusCode: 200,
+            headers: { "Content-Type": "application/json; charset=utf-8" },
+            body: JSON.stringify({ 
+                data: content, 
+                total: content.length
+            })
         };
     } catch (err) {
         console.error('Fetch error:', err);

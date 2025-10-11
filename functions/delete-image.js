@@ -36,16 +36,17 @@ export async function handler(event) {
     // Remove the entry
     memories = memories.filter(m => m.path !== path);
 
-    // Put updated json
+    // Put updated json with UTF-8
+    const newContent = Buffer.from(JSON.stringify(memories, null, 2), 'utf8').toString('base64');
     const putJsonRes = await fetch(jsonUrl, {
       method: "PUT",
       headers: {
         Authorization: `token ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
         message: `Remove memory at path: ${path}`,
-        content: btoa(JSON.stringify(memories)),
+        content: newContent,
         sha: jsonData.sha,
         branch,
       }),
@@ -55,7 +56,7 @@ export async function handler(event) {
       throw new Error((await putJsonRes.json()).message || "Update memories.json failed");
     }
 
-    // Now delete the image
+    // Delete the image
     const imageUrl = `https://api.github.com/repos/${user}/${repo}/contents/${path}?ref=${branch}`;
     const imageRes = await fetch(imageUrl, {
       headers: { Authorization: `token ${token}` }
@@ -69,7 +70,7 @@ export async function handler(event) {
       method: "DELETE",
       headers: {
         Authorization: `token ${token}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json; charset=utf-8"
       },
       body: JSON.stringify({
         message: `Xóa ảnh ${path}`,
@@ -88,6 +89,7 @@ export async function handler(event) {
       body: JSON.stringify({ success: true, path })
     };
   } catch (err) {
+    console.error('Delete error:', err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: err.message })
