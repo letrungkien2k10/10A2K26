@@ -8,10 +8,20 @@ body {
 }
 .student-card {
     transition: transform 0.3s, box-shadow 0.3s;
+    border-radius: 1.25rem !important; /* Bo góc lớn */
+    box-shadow: 0 6px 24px rgba(123,47,247,0.10), 0 1.5px 8px rgba(0,0,0,0.07);
+    background: #fff;
+    transition: box-shadow 0.3s, transform 0.3s, border 0.3s;
+    overflow: hidden;
+    position: relative;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 340px;
 }
 .student-card:hover {
     transform: translateY(-8px) scale(1.04);
-    box-shadow: 0 16px 32px rgba(123,47,247,0.15);
+    box-shadow: 0 16px 32px rgba(123,47,247,0.15), 0 4px 16px rgba(0,0,0,0.10);
 }
 .marquee-wrapper {
     display: flex;
@@ -112,51 +122,9 @@ body.dark .bg-purple-600 {
 body.dark .shadow-md, body.dark .shadow-lg {
     box-shadow: 0 4px 24px rgba(123,47,247,0.2) !important;
 }
-.role-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-right: 6px;
-    margin-bottom: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.2s ease;
-}
-.role-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-.monitor-badge {
-    background-color: #8b5cf6;
-    color: white;
-}
-.secretary-badge {
-    background-color: #f59e0b;
-    color: white;
-}
-.group-leader-badge {
-    background-color: #3b82f6;
-    color: white;
-}
-.member-badge {
-    background: #d1fae5;
-    color: #059616;
-    border-radius: 9999px;
-    padding: 2px 12px;
-    font-size: 0.95em;
-    font-weight: 500;
-    margin-right: 4px;
-    margin-bottom: 4px;
-    display: inline-block;
-}
-.assistant-badge {
-    background-color: #ec4899;
-    color: white;
-}
-.memory-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+.memory-grid, .student-grid {
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
 }
 .memory-card {
@@ -410,27 +378,122 @@ body.dark .memory-overlay {
   background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
   color: #f3f3f3;
 }
-/* Student Cards */
+/* Gradient Badges - Thay thế màu solid cho đẹp hơn */
+.role-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    /* Gradient chung cho hover effect */
+}
+.role-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.monitor-badge {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); /* Tím gradient */
+    color: white;
+}
+.secretary-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); /* Vàng gradient */
+    color: white;
+}
+.group-leader-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); /* Xanh dương gradient */
+    color: white;
+}
+.member-badge {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); /* Xanh lá nhạt gradient */
+    color: #059616;
+    border-radius: 9999px;
+    padding: 2px 12px;
+    font-size: 0.95em;
+    font-weight: 500;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+.assistant-badge {
+    background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); /* Hồng gradient */
+    color: white;
+}
+/* Dark mode cho gradient badges */
+body.dark .role-badge {
+    /* Điều chỉnh shadow cho dark mode */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+body.dark .monitor-badge {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+}
+body.dark .secretary-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+}
+body.dark .group-leader-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+}
+body.dark .member-badge {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #059616;
+}
+body.dark .assistant-badge {
+    background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+}
+
+/* Viền gradient cho các role đặc biệt - mỏng, bo đều các góc */
+.student-gradient-monitor,
+.student-gradient-labor,
+.student-gradient-study,
+.student-gradient-secretary,
+.student-gradient-leader {
+    border-left-width: 3px !important;           /* Mỏng hơn */
+    border-left-style: solid !important;
+    border-image-slice: 1 !important;
+    border-image-width: 3px !important;          /* Mỏng hơn */
+    border-image-outset: 0 !important;
+    border-image-repeat: stretch !important;
+    border-radius: 1.25rem !important;           /* Bo đều các góc */
+    background: #fff;
+    box-shadow: 0 4px 16px rgba(123,47,247,0.08);
+    transition: box-shadow 0.3s, transform 0.3s;
+    overflow: hidden;
+}
+
+/* Màu gradient cho từng role */
+.student-gradient-monitor {
+    border-image-source: linear-gradient(90deg, #7b2ff7, #f953c6);
+}
+.student-gradient-labor {
+    border-image-source: linear-gradient(90deg, #43e97b, #38f9d7);
+}
+.student-gradient-study {
+    border-image-source: linear-gradient(90deg, #396afc, #2948ff);
+}
+.student-gradient-secretary {
+    border-image-source: linear-gradient(90deg, #f7971e, #ffd200);
+}
+.student-gradient-leader {
+    border-image-source: linear-gradient(90deg, #43cea2, #185a9d);
+}
+
+/* Dark mode cho card học sinh */
 body.dark .student-card {
-  background-color: #2a2a2a;
-  border-color: #444;
+    background: #23232a;
+    box-shadow: 0 6px 24px rgba(123,47,247,0.18), 0 1.5px 8px rgba(0,0,0,0.12);
 }
 body.dark .student-card h3 {
-  color: #fff;
+    color: #fff;
 }
-body.dark .student-card .role-badge {
-  background-color: #444;
-  color: #ddd;
-}
-/* Student card hover */
-.student-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-}
-.student-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
-html {
-  scroll-behavior: smooth;
+.student-card,
+.student-gradient-monitor,
+.student-gradient-labor,
+.student-gradient-study,
+.student-gradient-secretary,
+.student-gradient-leader {
+    border-radius: 1.25rem !important; /* Bo đều các góc */
+    overflow: hidden;
 }

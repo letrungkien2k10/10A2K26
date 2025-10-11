@@ -95,3 +95,7 @@ Nếu gặp vấn đề, vui lòng liên hệ:
 ## 📄 License
 
 © 2025 Lớp 10A2-K26, Trường THPT Quế Lâm. Made with 💖 by Kiên.
+
+### Lỗi Filter/Search
+- Tìm kiếm chỉ áp dụng trên trang hiện tại: Đã fix bằng client-side pagination.
+- Không có kết quả: Hiển thị message "Không tìm thấy".

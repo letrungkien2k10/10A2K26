@@ -8,6 +8,15 @@ const correctPassword = "10A2K26"; // TODO: Move to environment variable for pro
 let lastUploadTime = 0;
 const UPLOAD_COOLDOWN = 5000; // 5 seconds between uploads
 
+// Pagination and filter state
+let currentPage = 1;
+let filteredMemories = [];
+let allMemoryElements = []; // Original list of DOM elements for filter/sort
+const itemsPerPage = 20;
+
+// No results div
+let noResultsDiv = null;
+
 // Input sanitization function
 function sanitizeInput(input) {
     return input.trim().replace(/[<>]/g, '');
@@ -58,6 +67,132 @@ function setupLazyLoading() {
     }
 }
 
+// Create no results div
+function createNoResultsDiv() {
+    noResultsDiv = document.createElement('div');
+    noResultsDiv.className = 'col-span-full text-center py-12';
+    noResultsDiv.innerHTML = `
+        <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Không tìm thấy kết quả</h3>
+        <p class="text-gray-500">Hãy thử từ khóa khác!</p>
+    `;
+    noResultsDiv.style.display = 'none';
+    return noResultsDiv;
+}
+
+// Apply filter and sort, then paginate
+function applyFilterAndSort() {
+    const searchText = document.getElementById('searchMemory').value.toLowerCase();
+    const sortValue = document.getElementById('sortMemory').value;
+
+    // Filter on original allMemoryElements (DOM elements)
+    let filtered = [...allMemoryElements].filter(mem => {
+        const title = mem.querySelector('.memory-title').textContent.toLowerCase();
+        return title.includes(searchText);
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+        if (sortValue === 'title') {
+            return a.querySelector('.memory-title').textContent.localeCompare(
+                b.querySelector('.memory-title').textContent);
+        } else if (sortValue === 'newest') {
+            return b.dataset.path.localeCompare(a.dataset.path);
+        } else if (sortValue === 'oldest') {
+            return a.dataset.path.localeCompare(b.dataset.path);
+        }
+        return 0;
+    });
+
+    filteredMemories = filtered;
+
+    // Hide all elements
+    allMemoryElements.forEach(el => el.style.display = 'none');
+
+    // Handle no results
+    if (filtered.length === 0) {
+        if (!noResultsDiv) {
+            const grid = document.querySelector('.memory-grid');
+            grid.appendChild(createNoResultsDiv());
+        }
+        noResultsDiv.style.display = 'block';
+        renderPagination(1); // Single "page" for no results
+        return;
+    } else {
+        if (noResultsDiv) noResultsDiv.style.display = 'none';
+    }
+
+    // Show paginated
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const paginated = filtered.slice(start, end);
+    paginated.forEach(el => el.style.display = 'block');
+
+    renderPagination(totalPages);
+}
+
+// Render pagination
+function renderPagination(totalPages) {
+    const pagination = document.querySelector('.pagination');
+    if (!pagination) return;
+
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) return; // No pagination if <=1 page
+
+    // Prev
+    const prevBtn = document.createElement('button');
+    prevBtn.textContent = '«';
+    prevBtn.className = `px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            applyFilterAndSort(); // Re-apply to show new page
+        }
+    };
+    pagination.appendChild(prevBtn);
+
+    // Numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+        button.onclick = () => {
+            currentPage = i;
+            applyFilterAndSort();
+        };
+        pagination.appendChild(button);
+    }
+
+    // Next
+    const nextBtn = document.createElement('button');
+    nextBtn.textContent = '»';
+    nextBtn.className = `px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            applyFilterAndSort();
+        }
+    };
+    pagination.appendChild(nextBtn);
+}
+
+// Debounce function
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // Check authentication from localStorage on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize AOS and Feather Icons first
@@ -83,20 +218,27 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         loadMemories();
     }, 100);
+
+    // Event listeners for search and sort
+    const searchInput = document.getElementById('searchMemory');
+    const sortSelect = document.getElementById('sortMemory');
+    const debouncedFilter = debounce(applyFilterAndSort, 300);
+    searchInput.addEventListener('input', debouncedFilter);
+    sortSelect.addEventListener('change', applyFilterAndSort);
 });
 
 // Load memories from server
 async function loadMemories() {
     try {
         showLoadingState(true);
-        const resp = await fetch(`/.netlify/functions/get-memories?page=${currentPage}&limit=20`);
+        const resp = await fetch('/.netlify/functions/get-memories');
         if (!resp.ok) {
             const errorData = await resp.json().catch(() => ({ error: 'Unknown error' }));
             throw new Error(errorData.error || `HTTP ${resp.status}: Failed to load memories`);
         }
 
         const responseData = await resp.json();
-        const { data: memories, total, totalPages } = responseData || {};
+        const { data: memories, total } = responseData || {};
         
         // Validate response data
         if (!Array.isArray(memories)) {
@@ -107,25 +249,28 @@ async function loadMemories() {
         grid.innerHTML = '';
 
         if (memories.length === 0) {
-            grid.innerHTML = `
-                <div class="col-span-full text-center py-12">
-                    <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                    <h3 class="text-xl font-semibold text-gray-600 mb-2">Chưa có ảnh kỷ niệm</h3>
-                    <p class="text-gray-500">Hãy upload ảnh đầu tiên để bắt đầu!</p>
-                </div>
+            grid.appendChild(createNoResultsDiv());
+            noResultsDiv.innerHTML = `
+                <i data-feather="image" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-600 mb-2">Chưa có ảnh kỷ niệm</h3>
+                <p class="text-gray-500">Hãy upload ảnh đầu tiên để bắt đầu!</p>
             `;
+            noResultsDiv.style.display = 'block';
             feather.replace();
             return;
         }
 
+        // Create all DOM elements
+        allMemoryElements = [];
         memories.forEach(mem => {
             const memoryCard = document.createElement('div');
             memoryCard.className = 'memory-card';
             memoryCard.dataset.path = mem.path;
+            memoryCard.style.display = 'none'; // Initially hidden
             memoryCard.innerHTML = `
                 <img src="${mem.url}" alt="${mem.title}" class="memory-img" loading="lazy">
                 <div class="memory-overlay">
-                    <h3 class="memory-title">${mem.title}</h3>
+                    <h3 class="memory-title">${escapeHtml(mem.title)}</h3>
                     <p class="memory-date">${new Date(mem.date).toLocaleDateString('vi-VN')}</p>
                 </div>
                 <div class="memory-actions" style="display: ${isAuthenticated ? 'flex' : 'none'};">
@@ -134,11 +279,14 @@ async function loadMemories() {
                 </div>
             `;
             grid.appendChild(memoryCard);
+            allMemoryElements.push(memoryCard);
         });
 
         feather.replace();
-        filterAndSortMemories();
-        renderPagination(totalPages);
+
+        // Initial filter/sort/paginate
+        currentPage = 1;
+        applyFilterAndSort();
 
     } catch (err) {
         console.error('Load memories error:', err);
@@ -147,16 +295,12 @@ async function loadMemories() {
         const grid = document.querySelector('.memory-grid');
         grid.innerHTML = `
             <div class="col-span-full text-center py-12">
-                <i data-feather="wifi-off" class="w-16 h-16 mx-auto text-gray-400 mb-4"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">Không thể tải kỷ niệm</h3>
-                <p class="text-gray-500 mb-4">Vui lòng kiểm tra kết nối mạng và thử lại.</p>
-                <button onclick="loadMemories()" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
-                    Thử lại
-                </button>
+                <i data-feather="alert-triangle" class="w-16 h-16 mx-auto text-red-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-red-600 mb-2">Lỗi tải dữ liệu</h3>
+                <p class="text-gray-500">Kiểm tra kết nối và thử lại!</p>
             </div>
         `;
         feather.replace();
-        showErrorToast("Lỗi tải kỷ niệm: " + err.message);
     } finally {
         showLoadingState(false);
     }
@@ -628,8 +772,14 @@ const studentContainer = document.getElementById('student-container');
 
 // Danh sách học sinh (role là mảng)
 const students = [
-    { name: 'Hoàng Quốc Vương', role: ['member'], img: 'img/vuong.jpg' },
-    { name: 'Nguyễn Duy Anh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Vũ Kim Huệ', role: ['monitor'], img: 'img/hue.jpg' },
+    { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Nguyễn Xuân Hưng', role: ['studying'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Nguyễn Đức Lĩnh', role: ['studying'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Phạm Hà Vy', role: ['deputy-labor'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Nguyễn Duy Anh', role: ['group-leader-1'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Nguyễn Khánh Hưng', role: ['group-leader-2'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Hoàng Quốc Vương', role: ['group-leader-3'], img: 'img/vuong.jpg' },
     { name: 'Nguyễn Thanh Chúc', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Nguyễn Mạnh Cường', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Nguyễn Thanh Thùy Dung', role: ['member'], img: 'img/hoangquocvuong.jpg' },
@@ -637,13 +787,11 @@ const students = [
     { name: 'Trần Quang Định', role: ['member'], img: 'img/quangdinh.jpg' },
     { name: 'Phạm Minh Đức', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Đỗ Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg' },
+    { name: 'Nguyễn Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Nguyễn Khắc Hiếu', role: ['member'], img: 'img/hieu.jpg' },
     { name: 'Vi Sĩ Hoan', role: ['member'], img: 'img/vihoan.jpg' },
-    { name: 'Vũ Kim Huệ', role: ['member'], img: 'img/hue.jpg' },
     { name: 'Nguyễn Văn Huy', role: ['member'], img: 'img/huy.jpg' },
     { name: 'Nguyễn Phú Hưng', role: ['member'], img: 'img/phuhung.jpg' },
-    { name: 'Nguyễn Xuân Hưng', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Trần Vân Khánh', role: ['member'], img: 'img/vankhanh.jpg' },
     { name: 'Lê Trung Kiên', role: ['member'], img: 'img/ADMIN.jpg' },
     { name: 'Nguyễn Trung Kiên', role: ['member'], img: 'img/nguyenkien.jpg' },
@@ -653,15 +801,13 @@ const students = [
     { name: 'Nguyễn Hà Nhật Linh', role: ['member'], img: 'img/nhatlinh.jpg' },
     { name: 'Nguyễn Hoàng Linh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Phạm Bảo Nhật Linh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Đức Lĩnh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Bùi Khánh Ly', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Kiều Ngọc Mai', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Nguyễn Xuân Mai', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Hoàng Minh', role: ['monitor'], img: 'img/minh.jpg' },
+    { name: 'Nguyễn Hoàng Minh', role: ['member'], img: 'img/minh.jpg' },
     { name: 'Ngô Nguyên Hải Nam', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Nguyễn Thành Nam', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Vũ Bảo Ngọc', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Khánh Hưng', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Phạm Công Sơn', role: ['member'], img: 'img/hoangquocvuong.jpg' },
     { name: 'Nguyễn Thanh Thảo', role: ['member'], img: 'img/thanhthao.jpg' },
     { name: 'Nguyễn Thị Thân Thương', role: ['member'], img: 'img/thuong.jpg' },
@@ -669,35 +815,11 @@ const students = [
     { name: 'Nguyễn Thu Trang', role: ['member'], img: 'img/trang.jpg' },
     { name: 'Nguyễn Thanh Tuyền', role: ['member'], img: 'img/tuyen.jpg' },
     { name: 'Đỗ Thy', role: ['member'], img: 'img/thy.jpg' },
-    { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg' },
-    { name: 'Phạm Hà Vy', role: ['member'], img: 'img/hoangquocvuong.jpg' }
+    { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg' }
 ];
 
-// Sắp xếp students theo thứ tự role
-const roleOrder = {
-    'monitor': 1,
-    'studying': 2, 
-    'deputy-labor': 3,
-    'assistant-arts': 4,
-    'secretary': 5,
-    'group-leader': 6,
-    'member': 7
-};
-
-// Sắp xếp students theo role priority
-const sortedStudents = students.sort((a, b) => {
-    const aRole = a.role[0]; // Lấy role đầu tiên
-    const bRole = b.role[0];
-    const aOrder = roleOrder[aRole] || 999;
-    const bOrder = roleOrder[bRole] || 999;
-    
-    if (aOrder !== bOrder) {
-        return aOrder - bOrder;
-    }
-    
-    // Nếu cùng role, sắp xếp theo tên
-    return a.name.localeCompare(b.name, 'vi');
-});
+// Luôn giữ nguyên thứ tự gốc
+const sortedStudents = students.slice();
 
 // Function để render students với thứ tự đã sắp xếp
 function renderStudents(studentsToRender = sortedStudents) {
@@ -730,52 +852,45 @@ function renderStudents(studentsToRender = sortedStudents) {
 function renderStudentCard(student, container) {
     const defaultImg = 'img/default.jpg';
 
-    // Tạo các badge vai trò
+    // Badge
     let roleBadges = '';
     student.role.forEach(role => {
         let badgeClass = '';
         let badgeText = '';
-        
         if (role === 'monitor') {
-            badgeClass = 'monitor-badge';
-            badgeText = 'Lớp trưởng';
+            badgeClass = 'monitor-badge'; badgeText = 'Lớp trưởng';
         } else if (role === 'secretary') {
-            badgeClass = 'secretary-badge';
-            badgeText = 'Thư ký';
-        } else if (role === 'group-leader') {
-            badgeClass = 'group-leader-badge';
-            badgeText = 'Tổ trưởng';
-        } else if (role === 'assistant-arts') {
-            badgeClass = 'assistant-badge';
-            badgeText = 'Lớp phó Văn nghệ';
+            badgeClass = 'secretary-badge'; badgeText = 'Thư ký';
+        } else if (role === 'group-leader-1') {
+            badgeClass = 'group-leader-badge'; badgeText = 'Tổ trưởng 1';
+        } else if (role === 'group-leader-2') {
+            badgeClass = 'group-leader-badge'; badgeText = 'Tổ trưởng 2';
+        } else if (role === 'group-leader-3') {
+            badgeClass = 'group-leader-badge'; badgeText = 'Tổ trưởng 3';
         } else if (role === 'deputy-labor') {
-            badgeClass = 'assistant-badge';
-            badgeText = 'Lớp phó Lao động';
+            badgeClass = 'assistant-badge'; badgeText = 'Lớp phó Lao động';
         } else if (role === 'studying') {
-            badgeClass = 'assistant-badge';
-            badgeText = 'Lớp phó Học tập';
+            badgeClass = 'assistant-badge'; badgeText = 'Lớp phó Học tập';
         } else {
-            badgeClass = 'member-badge';
-            badgeText = 'Thành viên';
+            badgeClass = 'member-badge'; badgeText = 'Thành viên';
         }
-        
         roleBadges += `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
     });
 
-    // Xác định màu viền theo vai trò đầu tiên
-    let borderColor = '';
-    if (student.role.includes('monitor')) borderColor = 'border-purple-500';
-    else if (student.role.includes('deputy-labor')) borderColor = 'border-green-500';
-    else if (student.role.includes('studying')) borderColor = 'border-indigo-500';
-    else if (student.role.includes('secretary')) borderColor = 'border-yellow-500';
-    else if (student.role.includes('group-leader')) borderColor = 'border-blue-500';
-    else if (student.role.includes('assistant-arts')) borderColor = 'border-pink-500';
-    // Nếu chỉ là member thì không có border
-    if (student.role.length === 1 && student.role[0] === 'member') borderColor = '';
+    // Gradient border class
+    let borderClass = '';
+    if (student.role.includes('monitor')) borderClass = 'student-gradient-monitor';
+    else if (student.role.includes('deputy-labor')) borderClass = 'student-gradient-labor';
+    else if (student.role.includes('studying')) borderClass = 'student-gradient-study';
+    else if (student.role.includes('secretary')) borderClass = 'student-gradient-secretary';
+    else if (['group-leader-1', 'group-leader-2', 'group-leader-3'].some(r => student.role.includes(r))) borderClass = 'student-gradient-leader';
+
+    // member thì không có viền
+    if (student.role.length === 1 && student.role[0] === 'member') borderClass = '';
 
     // Create card element
     const card = document.createElement('div');
-    card.className = `student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderColor ? 'border-l-4 ' + borderColor : ''}`;
+    card.className = `student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg ${borderClass}`;
     card.setAttribute('data-role', student.role.join(' '));
     card.style.opacity = '0';
     card.style.transform = 'translateY(20px)';
@@ -824,9 +939,8 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
         } else {
             // Filter students theo role và giữ nguyên thứ tự
             const filterRoles = filter.split(' ');
-            const filteredStudents = sortedStudents.filter(student => 
-                filterRoles.some(role => student.role.includes(role))
-            );
+            // Khi filter
+            const filteredStudents = sortedStudents.filter(student => filterRoles.some(role => student.role.includes(role)));
             renderStudents(filteredStudents);
         }
     });
@@ -877,164 +991,3 @@ function openImageModal(src) {
 function closeImageModal() {
     document.getElementById('imageModal').classList.add('hidden');
 }
-
-// Pagination setup
-let currentPage = 1;
-const itemsPerPage = 8; // số ảnh trên 1 trang
-let filteredMemories = []; // danh sách sau khi lọc
-function renderPagination(totalPages) {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-
-    if (totalPages <= 1) {
-        pagination.style.display = 'none';
-        return;
-    } else {
-        pagination.style.display = 'flex';
-    }
-
-    // Prev
-    const prevBtn = document.createElement('button');
-    prevBtn.textContent = '«';
-    prevBtn.className = `px-3 py-1 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.onclick = () => {
-        if (currentPage > 1) {
-            currentPage--;
-            showPage(currentPage);
-        }
-    };
-    pagination.appendChild(prevBtn);
-
-    // Numbers
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i;
-        button.className = `px-3 py-1 rounded ${i === currentPage ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
-        button.onclick = () => {
-            currentPage = i;
-            showPage(currentPage);
-        };
-        pagination.appendChild(button);
-    }
-
-    // Next
-    const nextBtn = document.createElement('button');
-    nextBtn.textContent = '»';
-    nextBtn.className = `px-3 py-1 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'}`;
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.onclick = () => {
-        if (currentPage < totalPages) {
-            currentPage++;
-            showPage(currentPage);
-        }
-    };
-    pagination.appendChild(nextBtn);
-}
-
-function showPage(page) {
-    const memories = filteredMemories.length > 0 
-        ? filteredMemories 
-        : Array.from(document.querySelectorAll('.memory-card')).filter(mem => mem.dataset.type !== "guide");
-
-    const totalItems = memories.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-    memories.forEach((item, index) => {
-        item.style.display = 'none';
-        if (index >= (page - 1) * itemsPerPage && index < page * itemsPerPage) {
-            item.style.display = 'block';
-        }
-    });
-
-    renderPagination(totalPages);
-}
-
-// Khởi tạo phân trang sau khi load
-showPage(currentPage);
-
-// Search & Sort Memories with debounce
-const searchInput = document.getElementById('searchMemory');
-const sortSelect = document.getElementById('sortMemory');
-
-// Debounce function for search
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function filterAndSortMemories() {
-    const searchText = searchInput.value.toLowerCase();
-    let memories = Array.from(document.querySelectorAll('.memory-card'))
-        .filter(mem => mem.dataset.type !== "guide");
-
-    // Lọc
-    memories = memories.filter(mem => {
-        const title = mem.querySelector('.memory-title').textContent.toLowerCase();
-        return title.includes(searchText);
-    });
-
-    // Sắp xếp
-    const sortValue = sortSelect.value;
-    memories.sort((a, b) => {
-        if (sortValue === 'title') {
-            return a.querySelector('.memory-title').textContent.localeCompare(
-                b.querySelector('.memory-title').textContent);
-        } else if (sortValue === 'newest') {
-            return b.dataset.path.localeCompare(a.dataset.path); // Use path for sorting
-        } else if (sortValue === 'oldest') {
-            return a.dataset.path.localeCompare(b.dataset.path);
-        }
-    });
-
-    // Gán lại danh sách đã lọc
-    filteredMemories = memories;
-
-    // Render lại
-    const grid = document.querySelector('.memory-grid');
-    grid.innerHTML = '';
-    memories.forEach(mem => grid.appendChild(mem));
-
-    currentPage = 1;
-    showPage(currentPage);
-}
-
-// Apply debounce to search (300ms delay)
-const debouncedFilter = debounce(filterAndSortMemories, 300);
-searchInput.addEventListener('input', debouncedFilter);
-sortSelect.addEventListener('change', filterAndSortMemories);
-
-// Student Modal Functions
-function openStudentModal(name, img, roleText) {
-    document.getElementById('studentModalImg').src = img;
-    document.getElementById('studentModalName').textContent = name;
-    document.getElementById('studentModalRole').textContent = roleText;
-    document.getElementById('studentModal').classList.remove('hidden');
-    feather.replace();
-}
-
-function closeStudentModal() {
-    document.getElementById('studentModal').classList.add('hidden');
-}
-
-// Smooth scroll with offset (để không bị che bởi navbar)
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        const targetId = this.getAttribute('href').substring(1);
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-            e.preventDefault();
-            const yOffset = -80; // cao khoảng navbar
-            const y = targetEl.getBoundingClientRect().top + window.scrollY + yOffset;
-
-            window.scrollTo({ top: y, behavior: 'smooth' });
-        }
-    });
-});        
