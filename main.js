@@ -2,7 +2,6 @@
 
 // Authentication state
 let isAuthenticated = false;
-const correctPassword = "10A2K26"; // TODO: Move to environment variable for production
 
 // Rate limiting for uploads
 let lastUploadTime = 0;
@@ -405,7 +404,7 @@ document.getElementById('imageFile').addEventListener('change', function(e) {
 });
 
 // ================== UPLOAD IMAGE ==================
-function uploadImage() {
+async function uploadImage() {
     // Rate limiting check
     if (!canUpload()) {
         return;
@@ -477,6 +476,7 @@ function uploadImage() {
                     date,
                     filename: file.name,
                     contentBase64: base64,
+                    password: password
                 }),
             });
 
