@@ -35,6 +35,13 @@ body {
     from { transform: translateX(0); }
     to { transform: translateX(-50%); }
 }
+.filter-btn {
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+.filter-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 16px rgba(123,47,247,0.15);
+}
 .filter-btn.active {
     background-color: #7b2ff7;
     color: white;
@@ -135,8 +142,8 @@ body.dark .shadow-md, body.dark .shadow-lg {
     transition: all 0.3s ease;
 }
 .memory-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-8px) scale(1.04);
+    box-shadow: 0 16px 32px rgba(123,47,247,0.15), 0 4px 16px rgba(0,0,0,0.10);
 }
 .memory-img {
     width: 100%;
@@ -392,8 +399,8 @@ body.dark .memory-overlay {
     /* Gradient chung cho hover effect */
 }
 .role-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(123,47,247,0.18);
 }
 .monitor-badge {
     background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); /* Tím gradient */
@@ -443,80 +450,35 @@ body.dark .member-badge {
 body.dark .assistant-badge {
     background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
 }
-
-/* Viền gradient cho các role đặc biệt - mỏng, bo đều các góc */
-.student-gradient-monitor,
-.student-gradient-labor,
-.student-gradient-study,
-.student-gradient-secretary,
-.student-gradient-leader {
-    border-left-width: 3px !important;           /* Mỏng hơn */
-    border-left-style: solid !important;
-    border-image-slice: 1 !important;
-    border-image-width: 3px !important;          /* Mỏng hơn */
-    border-image-outset: 0 !important;
-    border-image-repeat: stretch !important;
-    border-radius: 1.25rem !important;           /* Bo đều các góc */
-    background: #fff;
-    box-shadow: 0 4px 16px rgba(123,47,247,0.08);
-    transition: box-shadow 0.3s, transform 0.3s;
-    overflow: hidden;
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 0.6s cubic-bezier(0.4,0,0.2,1) forwards;
 }
 
-/* Màu gradient cho từng role */
-.student-gradient-monitor {
-    border-image-source: linear-gradient(90deg, #7b2ff7, #f953c6);
-}
-.student-gradient-labor {
-    border-image-source: linear-gradient(90deg, #43e97b, #38f9d7);
-}
-.student-gradient-study {
-    border-image-source: linear-gradient(90deg, #396afc, #2948ff);
-}
-.student-gradient-secretary {
-    border-image-source: linear-gradient(90deg, #f7971e, #ffd200);
-}
-.student-gradient-leader {
-    border-image-source: linear-gradient(90deg, #43cea2, #185a9d);
-}
-
-/* Dark mode cho card học sinh */
-body.dark .student-card {
-    background: #23232a;
-    box-shadow: 0 6px 24px rgba(123,47,247,0.18), 0 1.5px 8px rgba(0,0,0,0.12);
-}
-body.dark .student-card h3 {
-    color: #fff;
-}
-.student-card,
-.student-gradient-monitor,
-.student-gradient-labor,
-.student-gradient-study,
-.student-gradient-secretary,
-.student-gradient-leader {
-    border-radius: 1.25rem !important; /* Bo đều các góc */
-    overflow: hidden;
-}
-
-/* Dark Mode Button - Always Visible & Mobile Friendly */
-#darkModeBtn {
-    display: flex !important; /* Force visible */
-    bottom: 20px; /* Giảm bottom trên mobile */
-}
-
-#darkModeBtn i {
-    transition: transform 0.3s ease;
-}
-
-#darkModeBtn:hover i {
-    transform: scale(1.1) rotate(10deg); /* Animate icon cute */
-}
-
-@media (max-width: 768px) {
-    #darkModeBtn {
-        bottom: 80px; /* Tránh overlap keyboard mobile */
-        right: 16px;
-        width: 48px;
-        height: 48px; /* Lớn hơn tí cho touch */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+#studentModal, #imageModal {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s, transform 0.3s;
+}
+#studentModal.show, #imageModal.show {
+    opacity: 1;
+    transform: scale(1);
+}
+#uploadBtn, #logoutBtn, #darkModeBtn, #mobileUploadBtn, #mobileLogoutBtn {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+#uploadBtn:hover, #logoutBtn:hover, #darkModeBtn:hover, #mobileUploadBtn:hover, #mobileLogoutBtn:hover {
+    transform: scale(1.08) translateY(-2px);
+    box-shadow: 0 6px 18px rgba(123,47,247,0.18);
 }

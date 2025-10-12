@@ -391,22 +391,27 @@
 
     <!-- Students Section -->
     <section id="students" class="py-16 bg-white" data-aos="fade-up">
-        <div class="max-w-6xl mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Danh sách học sinh lớp</h2>
-            <div class="mb-8">
-                <div class="bg-purple-100 rounded-full p-1 inline-flex">
-                    <button class="filter-btn active bg-white text-purple-600 px-4 py-1 rounded-full font-medium" data-filter="all">Tất cả</button>
-                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="monitor">Lớp trưởng</button>
-                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="studying deputy-labor">Lớp phó</button>
-                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="secretary">Thư ký</button>
-                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="group-leader-1 group-leader-2 group-leader-3">Tổ trưởng</button>
-                    <button class="filter-btn px-4 py-1 rounded-full font-medium hover:bg-purple-200 transition" data-filter="member">Thành viên</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" id="student-container">
-                <!-- Students will be loaded here by JS -->
-            </div>
+    <div class="max-w-6xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4 text-gray-800 dark:text-white">Danh sách học sinh lớp 10A2-K26</h2>
+        <p class="mb-8 text-gray-600 dark:text-gray-300">45 thành viên - <span id="studentCount">0</span> Học sinh</p>
+
+        <!-- Filter Buttons -->
+        <div class="flex justify-center mb-10">
+        <div class="bg-purple-100 rounded-full p-1 inline-flex">
+            <button class="filter-btn active bg-white text-purple-600 px-4 py-1 rounded-full font-medium" data-filter="all">Tất cả</button>
+            <button class="filter-btn px-4 py-1 rounded-full hover:bg-purple-200" data-filter="monitor">Lớp trưởng</button>
+            <button class="filter-btn px-4 py-1 rounded-full hover:bg-purple-200" data-filter="studying deputy-labor">Lớp phó</button>
+            <button class="filter-btn px-4 py-1 rounded-full hover:bg-purple-200" data-filter="secretary">Thư ký</button>
+            <button class="filter-btn px-4 py-1 rounded-full hover:bg-purple-200" data-filter="group-leader-1 group-leader-2 group-leader-3">Tổ trưởng</button>
+            <button class="filter-btn px-4 py-1 rounded-full hover:bg-purple-200" data-filter="member">Thành viên</button>
         </div>
+        </div>
+
+        <!-- Student Grid -->
+        <div id="student-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <!-- JS will load students here -->
+        </div>
+    </div>
     </section>
 
     <!-- Class Activities Marquee -->
