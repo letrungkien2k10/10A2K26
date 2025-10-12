@@ -1124,4 +1124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('studentModal');
         if (modal) modal.classList.add('hidden');
     };
+
 });
+
+document.getElementById('confirmPasswordBtn').addEventListener('click', checkPassword);
