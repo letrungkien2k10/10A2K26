@@ -24,6 +24,7 @@ export async function handler(event) {
     const repo = process.env.GITHUB_REPO;
     const branch = process.env.GITHUB_BRANCH || "main";
     const token = process.env.GITHUB_TOKEN;
+    const CLASS_PASSWORD = process.env.CLASS_PASSWORD;
 
     // Validate required environment variables
     if (!user || !repo || !token) {
@@ -107,3 +108,16 @@ export async function handler(event) {
     };
   }
 }
+
+exports.handler = async function(event, context) {
+  const { password, ...otherData } = JSON.parse(event.body);
+
+  if (password !== CLASS_PASSWORD) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify({ error: "Sai mật khẩu lớp!" })
+    };
+  }
+
+  return handler(event);
+};
