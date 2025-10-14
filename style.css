@@ -18,6 +18,8 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 340px;
+    flex: 1 1 calc(20% - 1.2rem) !important; /* Adjusted for 5 cards per row with gap */
+    max-width: calc(20% - 1.2rem) !important; /* Ensure max width fits 5 per row */
 }
 .student-card:hover {
     transform: translateY(-8px) scale(1.04);
@@ -481,4 +483,142 @@ body.dark .assistant-badge {
 #uploadBtn:hover, #logoutBtn:hover, #darkModeBtn:hover, #mobileUploadBtn:hover, #mobileLogoutBtn:hover {
     transform: scale(1.08) translateY(-2px);
     box-shadow: 0 6px 18px rgba(123,47,247,0.18);
+}
+
+body { 
+  font-family: 'Be Vietnam Pro', sans-serif; 
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  margin: 0;
+  padding: 0;
+}
+.gradient-bg {
+  background: linear-gradient(135deg, #7b2ff7 0%, #f107a3 100%);
+}
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.parallax-bg {
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+}
+/* From Uiverse.io by JeremGamingYT */ 
+.loader {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+.loader svg {
+  margin: 0 5px;
+  width: 64px;
+  height: 64px;
+}
+.absolute {
+  position: absolute;
+}
+.inline-block {
+  display: inline-block;
+}
+.w-2 {
+  width: 0.5em;
+}
+/* Animations */
+.dash {
+  animation:
+    dashArray 2s ease-in-out infinite,
+    dashOffset 2s linear infinite;
+}
+.spin {
+  animation:
+    spinDashArray 2s ease-in-out infinite,
+    spin 8s ease-in-out infinite,
+    dashOffset 2s linear infinite;
+  transform-origin: center;
+}
+@keyframes dashArray {
+  0% { stroke-dasharray: 0 1 359 0; }
+  50% { stroke-dasharray: 0 359 1 0; }
+  100% { stroke-dasharray: 359 1 0 0; }
+}
+@keyframes spinDashArray {
+  0% { stroke-dasharray: 270 90; }
+  50% { stroke-dasharray: 0 360; }
+  100% { stroke-dasharray: 270 90; }
+}
+@keyframes dashOffset {
+  0% { stroke-dashoffset: 365; }
+  100% { stroke-dashoffset: 5; }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  12.5%, 25% { transform: rotate(270deg); }
+  37.5%, 50% { transform: rotate(540deg); }
+  62.5%, 75% { transform: rotate(810deg); }
+  87.5%, 100% { transform: rotate(1080deg); }
+}
+
+/* Dégradés */
+.gradient-b {
+  stroke: url(#b);
+}
+
+.gradient-c {
+  stroke: url(#c);
+}
+
+.gradient-d {
+  stroke: url(#d);
+}
+#globalLoader {
+  animation: loaderBgMove 3s linear infinite;
+  background-size: 200% 200%;
+}
+/* Nâng cấp animation cho loader background */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes shadowPulse {
+  0% {
+    box-shadow: 
+      0 0 80px 0 rgba(123, 47, 247, 0.2), 
+      0 0 120px 0 rgba(236, 72, 153, 0.15), 
+      inset 0 0 100px rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    box-shadow: 
+      0 0 100px 0 rgba(123, 47, 247, 0.3), 
+      0 0 150px 0 rgba(236, 72, 153, 0.25), 
+      inset 0 0 120px rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Tối ưu cho dark mode (nếu có) */
+body.dark #globalLoader {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 25%, #be185d 50%, #db2777 75%, #06b6d4 100%);
 }

@@ -199,14 +199,14 @@ function debounce(func, wait) {
 
 // Check authentication from localStorage on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize AOS and Feather Icons first
-    AOS.init({
-        duration: 800,
-        once: true,
-        offset: 100
-    });
-    feather.replace();
-    
+    // XÓA hoặc COMMENT 2 dòng này:
+    // AOS.init({
+    //     duration: 800,
+    //     once: true,
+    //     offset: 100
+    // });
+    // feather.replace();
+
     const authStatus = localStorage.getItem('isAuthenticated');
     isAuthenticated = authStatus === 'true';
     
@@ -307,6 +307,8 @@ async function loadMemories() {
         feather.replace();
     } finally {
         showLoadingState(false);
+        // Hiện nội dung web khi dữ liệu đã render xong
+        window.showMainContent && window.showMainContent();
     }
 }
 
@@ -479,224 +481,104 @@ function uploadImage() {
                     contentBase64: base64,
                 }),
             });
-
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.error || "Upload lá»—i");
-
-            // ✅ Thêm ảnh mới vào web ngay mà không cần reload
-            const newMemory = document.createElement('div');
-            newMemory.className = 'memory-card';
-            newMemory.dataset.path = data.path;
-            newMemory.innerHTML = `
-                <img src="${data.url}" alt="${title}" class="memory-img">
-                <div class="memory-overlay">
-                    <h3 class="memory-title">${title}</h3>
-                    <p class="memory-date">${new Date(date).toLocaleDateString('vi-VN')}</p>
-                </div>
-                <div class="memory-actions" style="display: ${isAuthenticated ? 'flex' : 'none'};">
-                    <div class="memory-action-btn edit-btn"><i data-feather="edit"></i></div>
-                    <div class="memory-action-btn delete-btn"><i data-feather="trash-2"></i></div>
-                </div>
-            `;
-            document.querySelector('.memory-grid').prepend(newMemory);
-
-            // Update rate limiting
-            lastUploadTime = Date.now();
-            
-            closeUploadModal();
-            showSuccessToast("Thêm ảnh thành công!");
-            feather.replace();
-            filterAndSortMemories();
-        } catch (err) {
-            showErrorToast("Lỗi upload: " + err.message);
-        } finally {
-            // Complete progress and reset UI
             clearInterval(progressInterval);
             progressBar.style.width = '100%';
-            progressText.textContent = 'Hoàn thành!';
-            
+            progressText.textContent = 'Hoàn tất...';
+
+            if (!resp.ok) {
+                const errorData = await resp.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.error || `HTTP ${resp.status}: Upload failed`);
+            }
+
+            const data = await resp.json();
+            showSuccessToast(`Upload thành công: ${data.path}`);
+            closeUploadModal();
+            loadMemories(); // Reload memories
+            lastUploadTime = Date.now();
+
+        } catch (err) {
+            console.error('Upload error:', err);
+            showErrorToast(`Lỗi upload: ${err.message}`);
+            progressText.textContent = 'Lỗi...';
+            progressBar.style.backgroundColor = '#ef4444';
+        } finally {
             setTimeout(() => {
                 uploadBtn.innerHTML = originalText;
                 uploadBtn.disabled = false;
                 uploadProgress.classList.add('hidden');
                 progressBar.style.width = '0%';
-            }, 1000);
+                progressBar.style.backgroundColor = '#7b2ff7';
+            }, 1500);
         }
     };
-
     reader.readAsDataURL(file);
 }
 
-// Utility functions for better UX
-function showLoadingState(show) {
-    const grid = document.querySelector('.memory-grid');
-    const skeleton = document.getElementById('memorySkeleton');
-    
-    if (show) {
-        // Show skeleton loading
-        skeleton.classList.remove('hidden');
-        grid.innerHTML = '';
-        grid.appendChild(skeleton);
-    } else {
-        // Hide skeleton
-        skeleton.classList.add('hidden');
-    }
+// ================== TOAST NOTIFICATIONS ==================
+function showSuccessToast(message) {
+    const toast = document.getElementById('successToast');
+    toast.querySelector('span').textContent = message;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3000);
 }
 
-function showSuccessToast(message = "Upload ảnh thành công!") {
+function showErrorToast(message) {
     const toast = document.getElementById('successToast');
+    toast.classList.add('bg-red-500'); // Override to red
     toast.querySelector('span').textContent = message;
     toast.classList.remove('hidden');
     setTimeout(() => {
         toast.classList.add('hidden');
+        toast.classList.remove('bg-red-500'); // Reset to green
     }, 3000);
 }
 
-function showErrorToast(message) {
-    // Create error toast if not exists
-    let errorToast = document.getElementById('errorToast');
-    if (!errorToast) {
-        errorToast = document.createElement('div');
-        errorToast.id = 'errorToast';
-        errorToast.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center hidden z-50';
-        errorToast.innerHTML = '<i data-feather="alert-circle" class="mr-2"></i><span></span>';
-        document.body.appendChild(errorToast);
-    }
-    
-    errorToast.querySelector('span').textContent = message;
-    errorToast.classList.remove('hidden');
-    feather.replace();
-    setTimeout(() => {
-        errorToast.classList.add('hidden');
-    }, 4000);
-}
-
-function showMemoryActions() {
-    const memoryActions = document.querySelectorAll('.memory-actions');
-    memoryActions.forEach(actions => {
-        if (actions) {
-            actions.style.display = isAuthenticated ? 'flex' : 'none';
-        }
-    });
-    
-    // Also update edit/delete buttons in existing memories
-    document.querySelectorAll('.edit-memory-btn, .delete-memory-btn').forEach(btn => {
-        btn.style.display = isAuthenticated ? 'flex' : 'none';
-    });
-}
-
-// Logout function
-function logout() {
-    isAuthenticated = false;
-    localStorage.removeItem('isAuthenticated');
-    showMemoryActions();
-    updateUploadButtonUI();
-    loadMemories(); // Reload to hide actions
-    showSuccessToast("Đã đăng xuất!");
-    closeUploadModal();
-}
-
-// Delete memory function
-async function deleteMemory(path) {
-    if (!isAuthenticated) {
-        showSuccessToast("Vui lòng đăng nhập để thực hiện!");
-        openPasswordModal();
-        return;
-    }
-
-    if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
-        try {
-            const resp = await fetch('/.netlify/functions/delete-image', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ path })
-            });
-
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.error || "Xóa lỗi");
-
-            // Remove from DOM
-            const memoryItem = document.querySelector(`.memory-card[data-path="${path}"]`);
-            if (memoryItem) {
-                memoryItem.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => {
-                    memoryItem.remove();
-                    showSuccessToast("Đã xóa ảnh thành công!");
-                    showPage(currentPage);
-                }, 300);
-            }
-        } catch (err) {
-            alert("❌ Có lỗi khi xóa: " + err.message);
-        }
-    }
-}
-
-// Edit memory function
-function editMemory(path) {
-    if (!isAuthenticated) {
-        showSuccessToast("Vui lòng đăng nhập để thực hiện!");
-        openPasswordModal();
-        return;
-    }
-
-    const memoryItem = document.querySelector(`.memory-card[data-path="${path}"]`);
-    if (memoryItem) {
-        const title = memoryItem.querySelector('.memory-title').textContent;
-        const date = memoryItem.querySelector('.memory-date').textContent;
-        
-        document.getElementById('imageTitle').value = title;
-        document.getElementById('imageDate').value = new Date(date).toISOString().split('T')[0];
-        document.getElementById('uploadForm').dataset.editing = path;
-        
-        openUploadModal();
-    }
-}
-
-// Initialize memory actions
-document.addEventListener('click', function(e) {
+// ================== MEMORY ACTIONS (Authenticated) ==================
+document.addEventListener('click', async (e) => {
     if (e.target.closest('.delete-btn')) {
-        const memoryItem = e.target.closest('.memory-card');
-        deleteMemory(memoryItem.dataset.path);
+        const card = e.target.closest('.memory-card');
+        const path = card.dataset.path;
+        if (confirm('Bạn có chắc muốn xóa ảnh này?')) {
+            try {
+                const resp = await fetch('/.netlify/functions/delete-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path })
+                });
+                if (resp.ok) {
+                    showSuccessToast('Xóa ảnh thành công!');
+                    loadMemories(); // Reload
+                } else {
+                    throw new Error('Delete failed');
+                }
+            } catch (err) {
+                showErrorToast('Lỗi xóa ảnh!');
+            }
+        }
     }
-    
+
     if (e.target.closest('.edit-btn')) {
-        const memoryItem = e.target.closest('.memory-card');
-        editMemory(memoryItem.dataset.path);
-    }
-    
-    // Open image modal on click
-    const img = e.target.closest('.memory-img');
-    if (img) {
-        openImageModal(img.src);
-    }
-    
-    // Open student modal on click
-    const card = e.target.closest('.student-card');
-    if (card) {
-        const name = card.querySelector('h3').textContent;
-        const img = card.querySelector('img').src;
-        const roleBadges = Array.from(card.querySelectorAll('.role-badge'))
-                                .map(b => b.textContent)
-                                .join(', ');
-        openStudentModal(name, img, roleBadges);
+        // TODO: Implement edit functionality
+        alert('Chức năng chỉnh sửa đang được phát triển...');
     }
 });
 
-// Close modals when clicking outside
-window.onclick = function(event) {
-    if (event.target.id === 'passwordModal') {
-        closePasswordModal();
-    }
-    if (event.target.id === 'uploadModal') {
-        closeUploadModal();
-    }
+function showMemoryActions() {
+    // Show delete/edit buttons if authenticated
+    document.querySelectorAll('.memory-actions').forEach(actions => {
+        actions.style.display = 'flex';
+    });
+}
+
+// ================== MODALS ==================
+document.addEventListener('click', (event) => {
     if (event.target.id === 'imageModal') {
         closeImageModal();
     }
     if (event.target.id === 'studentModal') {
         closeStudentModal();
     }
-}
+});
 
 // Mobile menu toggle with improved UX
 const mobileMenuBtn = document.querySelector('.mobile-menu-button');
@@ -774,74 +656,58 @@ window.addEventListener('load', checkCounters);
 // Student list generator
 const studentContainer = document.getElementById('student-container');
 
-// Danh sách học sinh (role là mảng) - Data thực tế
+// Danh sách học sinh (role là mảng) - Data thực tế, thêm trường order để giữ thứ tự
 const students = [
-    { name: 'Vũ Kim Huệ', role: ['monitor'], img: 'img/hue.jpg' },
-    { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Xuân Hương', role: ['studying'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Đức Linh', role: ['studying'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Phạm Hà Vy', role: ['deputy-labor'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Duy Anh', role: ['group-leader-1'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Khánh Hương', role: ['group-leader-2'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Hoàng Quốc Vương', role: ['group-leader-3'], img: 'img/vuong.jpg' },
-    { name: 'Nguyễn Thanh Chúc', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Mạnh Cường', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Thanh Thùy Dung', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Trần Đăng Dũng', role: ['member'], img: 'img/dung.jpg' },
-    { name: 'Trần Quang Định', role: ['member'], img: 'img/quangdinh.jpg' },
-    { name: 'Phạm Minh Đức', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Đỗ Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Khắc Hiếu', role: ['member'], img: 'img/hieu.jpg' },
-    { name: 'Vi Sỹ Hoan', role: ['member'], img: 'img/vihoan.jpg' },
-    { name: 'Nguyễn Văn Huy', role: ['member'], img: 'img/huy.jpg' },
-    { name: 'Nguyễn Phú Hương', role: ['member'], img: 'img/phuhung.jpg' },
-    { name: 'Trần Vân Khánh', role: ['member'], img: 'img/vankhanh.jpg' },
-    { name: 'Lê Trung Kiên', role: ['member'], img: 'img/ADMIN.jpg' },
-    { name: 'Nguyễn Trung Kiên', role: ['member'], img: 'img/nguyenkien.jpg' },
-    { name: 'Nguyễn Bảo Lâm', role: ['member'], img: 'img/lam.jpg' },
-    { name: 'Nguyễn Thu Lê', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Lê Thị Ngọc Linh', role: ['member'], img: 'img/ngoclinh.jpg' },
-    { name: 'Nguyễn Hà Nhật Linh', role: ['member'], img: 'img/nhatlinh.jpg' },
-    { name: 'Nguyễn Hoàng Linh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Phạm Bảo Nhật Linh', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Bùi Khánh Ly', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Kiều Ngọc Mai', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Xuân Mai', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Hoàng Minh', role: ['member'], img: 'img/minh.jpg' },
-    { name: 'Ngô Nguyên Hải Nam', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Thành Nam', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Vũ Bảo Ngọc', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Phạm Công Sơn', role: ['member'], img: 'img/hoangquocvuong.jpg' },
-    { name: 'Nguyễn Thanh Thảo', role: ['member'], img: 'img/thanhthao.jpg' },
-    { name: 'Nguyễn Thị Thân Thương', role: ['member'], img: 'img/thuong.jpg' },
-    { name: 'Hoàng Mạnh Tiến', role: ['member'], img: 'img/tien.jpg' },
-    { name: 'Nguyễn Thu Trang', role: ['member'], img: 'img/trang.jpg' },
-    { name: 'Nguyễn Thanh Tuyển', role: ['member'], img: 'img/tuyen.jpg' },
-    { name: 'Đỗ Thy', role: ['member'], img: 'img/thy.jpg' },
-    { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg' }
+    { name: 'Vũ Kim Huệ', role: ['monitor'], img: 'img/hue.jpg', order: 0 },
+    { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg', order: 1 },
+    { name: 'Nguyễn Xuân Hưng', role: ['studying'], img: 'img/hoangquocvuong.jpg', order: 2 },
+    { name: 'Nguyễn Đức Lĩnh', role: ['studying'], img: 'img/hoangquocvuong.jpg', order: 3 },
+    { name: 'Phạm Hà Vy', role: ['deputy-labor'], img: 'img/hoangquocvuong.jpg', order: 4 },
+    { name: 'Nguyễn Duy Anh', role: ['group-leader-1'], img: 'img/hoangquocvuong.jpg', order: 5 },
+    { name: 'Nguyễn Khánh Hưng', role: ['group-leader-2'], img: 'img/hoangquocvuong.jpg', order: 6 },
+    { name: 'Hoàng Quốc Vương', role: ['group-leader-3'], img: 'img/vuong.jpg', order: 7 },
+    { name: 'Nguyễn Thanh Chúc', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 8 },
+    { name: 'Nguyễn Mạnh Cường', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 9 },
+    { name: 'Nguyễn Thanh Thùy Dung', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 10 },
+    { name: 'Trần Đăng Dũng', role: ['member'], img: 'img/dung.jpg', order: 11 },
+    { name: 'Trần Quang Định', role: ['member'], img: 'img/quangdinh.jpg', order: 12 },
+    { name: 'Phạm Minh Đức', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 13 },
+    { name: 'Đỗ Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 14 },
+    { name: 'Nguyễn Trường Giang', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 15 },
+    { name: 'Nguyễn Khắc Hiếu', role: ['member'], img: 'img/hieu.jpg', order: 16 },
+    { name: 'Vi Sỹ Hoan', role: ['member'], img: 'img/vihoan.jpg', order: 17 },
+    { name: 'Nguyễn Văn Huy', role: ['member'], img: 'img/huy.jpg', order: 18 },
+    { name: 'Nguyễn Phú Hưng', role: ['member'], img: 'img/phuhung.jpg', order: 19 },
+    { name: 'Trần Vân Khánh', role: ['member'], img: 'img/vankhanh.jpg', order: 20 },
+    { name: 'Lê Trung Kiên', role: ['member'], img: 'img/ADMIN.jpg', order: 21 },
+    { name: 'Nguyễn Trung Kiên', role: ['member'], img: 'img/nguyenkien.jpg', order: 22 },
+    { name: 'Nguyễn Bảo Lâm', role: ['member'], img: 'img/lam.jpg', order: 23 },
+    { name: 'Nguyễn Thu Lê', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 24 },
+    { name: 'Lê Thị Ngọc Linh', role: ['member'], img: 'img/ngoclinh.jpg', order: 25 },
+    { name: 'Nguyễn Hà Nhật Linh', role: ['member'], img: 'img/nhatlinh.jpg', order: 26 },
+    { name: 'Nguyễn Hoàng Linh', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 27 },
+    { name: 'Phạm Bảo Nhật Linh', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 28 },
+    { name: 'Bùi Khánh Ly', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 29 },
+    { name: 'Kiều Ngọc Mai', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 30 },
+    { name: 'Nguyễn Xuân Mai', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 31 },
+    { name: 'Nguyễn Hoàng Minh', role: ['member'], img: 'img/minh.jpg', order: 32 },
+    { name: 'Ngô Nguyên Hải Nam', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 33 },
+    { name: 'Nguyễn Thành Nam', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 34 },
+    { name: 'Nguyễn Hoàng Bích Ngọc', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 35 },
+    { name: 'Vũ Bảo Ngọc', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 36 },
+    { name: 'Phạm Công Sơn', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 37 },
+    { name: 'Nguyễn Thanh Thảo', role: ['member'], img: 'img/thanhthao.jpg', order: 38 },
+    { name: 'Nguyễn Thị Thân Thương', role: ['member'], img: 'img/thuong.jpg', order: 39 },
+    { name: 'Hoàng Mạnh Tiến', role: ['member'], img: 'img/tien.jpg', order: 40 },
+    { name: 'Nguyễn Thu Trang', role: ['member'], img: 'img/trang.jpg', order: 41 },
+    { name: 'Nguyễn Thanh Tuyển', role: ['member'], img: 'img/tuyen.jpg', order: 42 },
+    { name: 'Đỗ Thy', role: ['member'], img: 'img/thy.jpg', order: 43 },
+    { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg', order: 44 }
 ];
 
 // Students state
 let sortedStudents = [];
 let currentFilter = 'all';
-
-// Role priority map (từ cao xuống thấp: monitor > secretary > studying/deputy-labor > group-leader > member)
-const rolePriority = {
-    'monitor': 7,
-    'secretary': 6,
-    'studying': 5,
-    'deputy-labor': 5,
-    'group-leader-1': 4,
-    'group-leader-2': 3,
-    'group-leader-3': 2,
-    'member': 1
-};
-
-// Helper: Lấy primary role (role đầu tiên trong mảng)
-function getPrimaryRole(student) {
-    return student.role && student.role.length > 0 ? student.role[0] : 'member';
-}
 
 // Helper: Lấy text role cho badge (thay 'monitor' thành 'Lớp trưởng')
 function getRoleText(role) {
@@ -858,22 +724,10 @@ function getRoleText(role) {
     return texts[role] || 'Thành viên';
 }
 
-// Function để sort students theo role priority (giảm dần) + alphabet tên
-function sortStudentsByRolePriority(studentsToSort) {
-    return [...studentsToSort].sort((a, b) => {
-        const priorityA = rolePriority[getPrimaryRole(a)] || 1;
-        const priorityB = rolePriority[getPrimaryRole(b)] || 1;
-        if (priorityA !== priorityB) {
-            return priorityB - priorityA; // Cao xuống thấp
-        }
-        return a.name.localeCompare(b.name, 'vi');
-    });
-}
-
-// Function để render students với sort theo role priority + alphabet
+// Function để render students theo thứ tự order (từ nhỏ đến lớn)
 function renderStudents(studentsToRender = students) {
-    // Đảm bảo luôn sort trước khi render (an toàn)
-    const sorted = sortStudentsByRolePriority(studentsToRender);
+    // Sắp xếp theo order để đảm bảo thứ tự cố định
+    const sorted = [...studentsToRender].sort((a, b) => a.order - b.order);
     sortedStudents = sorted;
 
     const container = document.getElementById('student-container');
@@ -882,6 +736,12 @@ function renderStudents(studentsToRender = students) {
         return;
     }
     container.innerHTML = '';
+
+    // Force flex layout để order hoạt động đúng
+    container.style.display = 'flex';
+    container.style.flexWrap = 'wrap';
+    container.style.gap = '1.5rem';
+    container.style.justifyContent = 'center';
 
     const countEl = document.getElementById('studentCount');
     if (countEl) countEl.textContent = sortedStudents.length;
@@ -900,6 +760,19 @@ function renderStudents(studentsToRender = students) {
         if (currentIndex < sortedStudents.length) {
             requestAnimationFrame(renderBatch);
         } else {
+            // Force sort DOM elements by order sau khi render
+            setTimeout(() => {
+                const cards = Array.from(container.children);
+                cards.sort((a, b) => {
+                    const orderA = parseInt(a.dataset.order) || 999;
+                    const orderB = parseInt(b.dataset.order) || 999;
+                    return orderA - orderB;
+                });
+                cards.forEach(card => {
+                    container.appendChild(card);
+                });
+            }, 100); // Đợi animation xong
+
             // Replace icons sau khi render xong
             if (typeof feather !== 'undefined') feather.replace();
         }
@@ -929,23 +802,16 @@ function renderStudentCard(student, container, index = 0) {
         roleBadges += `<span class="role-badge ${badgeClass}">${badgeText}</span>`;
     });
 
-    // Gradient border class (sử dụng includes)
-    let borderClass = '';
-    if (student.role.includes('monitor')) borderClass = 'student-gradient-monitor';
-    else if (student.role.includes('deputy-labor')) borderClass = 'student-gradient-labor';
-    else if (student.role.includes('studying')) borderClass = 'student-gradient-study';
-    else if (student.role.includes('secretary')) borderClass = 'student-gradient-secretary';
-    else if (['group-leader-1', 'group-leader-2', 'group-leader-3'].some(r => student.role.includes(r))) borderClass = 'student-gradient-leader';
-
-    // member thì không có viền
-    if (student.role.length === 1 && student.role[0] === 'member') borderClass = '';
-
-    // Create card element (thêm onclick cho modal)
+    // Card HTML (tất cả đều dùng student-card)
     const card = document.createElement('div');
-    card.className = `student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg fade-in-up ${borderClass}`;
+    card.className = `student-card bg-white rounded-xl shadow-md overflow-hidden transition duration-300 hover:shadow-lg fade-in-up flex flex-col`;
     card.setAttribute('data-role', student.role.join(' '));
-    card.style.animationDelay = `${index * 0.07}s`; // Cascade effect
+    card.dataset.order = student.order;
+    card.style.animationDelay = `${index * 0.07}s`;
     card.style.cursor = 'pointer';
+    card.style.order = student.order; // Set CSS order
+    card.style.flex = '1 1 250px'; // Flex basis cho grid-like
+    card.style.maxWidth = '300px';
     card.onclick = (e) => {
         if (e.target.classList.contains('role-badge')) return;
         openStudentModal(student.name, student.img, roleBadges);
@@ -957,7 +823,7 @@ function renderStudentCard(student, container, index = 0) {
                 onerror="this.src='${defaultImg}';"
                 loading="lazy">
         </div>
-        <div class="p-5">
+        <div class="p-5 flex-grow">
             <h3 class="font-bold text-lg">${escapeHtml(student.name)}</h3>
             <div class="mt-3 flex flex-wrap">
                 ${roleBadges}
@@ -1005,13 +871,10 @@ window.closeStudentModal = function() {
     if (modal) modal.classList.add('hidden');
 };
 
-// Thêm vào DOMContentLoaded để init students với sort
+// Thêm vào DOMContentLoaded để init students với thứ tự order
 document.addEventListener('DOMContentLoaded', function() {
-    // ... (các phần khác giữ nguyên)
-
-    // Sắp xếp mặc định theo rolePriority + tên
-    const sortedDefault = sortStudentsByRolePriority(students);
-    renderStudents(sortedDefault);
+    // Render theo thứ tự order
+    renderStudents(students);
 
     // Filter students
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1025,16 +888,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const filterRoles = filter.split(' ');
 
             if (filter === 'all') {
-                // Sắp xếp theo role priority trước khi render
-                const sortedAll = sortStudentsByRolePriority(students);
-                renderStudents(sortedAll);
+                // Render theo thứ tự order
+                renderStudents(students);
             } else {
-                // Sort theo rolePriority + tên trước
-                const sorted = sortStudentsByRolePriority(students);
-                // Filter theo role
-                const filteredStudents = sorted.filter(student =>
+                // Filter theo role, rồi sort theo order để giữ thứ tự gốc
+                const filteredStudents = students.filter(student =>
                     student.role.some(role => filterRoles.includes(role))
                 );
+                // Render với thứ tự order
                 renderStudents(filteredStudents);
             }
         });
