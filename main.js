@@ -364,24 +364,38 @@ function closePasswordModal() {
     document.getElementById('passwordInput').value = '';
 }
 
-function checkPassword() {
+async function checkPassword() {
     const enteredPassword = document.getElementById('passwordInput').value;
     const errorElement = document.getElementById('passwordError');
-    
-    if (enteredPassword === correctPassword) {
+    try {
+        const resp = await fetch('/.netlify/functions/auth-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: enteredPassword })
+        });
+        if (!resp.ok) {
+            let msg = 'Xác thực thất bại.';
+            try { const data = await resp.json(); if (data?.error) msg = data.error; } catch(_) {}
+            if (resp.status === 404) msg = 'Không tìm thấy function auth-check. Hãy deploy lên Netlify.';
+            if (resp.status === 500) msg = 'Máy chủ chưa cấu hình CLASS_PASSWORD.';
+            throw new Error(msg);
+        }
         isAuthenticated = true;
+        classPassword = enteredPassword;
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('classPassword', classPassword);
         closePasswordModal();
         openUploadModal();
         showMemoryActions();
         updateUploadButtonUI();
-        loadMemories(); // Reload to show actions
-        showSuccessToast("Đăng nhập thành công!");
-    } else {
-        errorElement.textContent = "Mật khẩu không đúng. Vui lòng thử lại.";
+        loadMemories();
+        showSuccessToast('Đăng nhập thành công!');
+    } catch (e) {
+        errorElement.textContent = e.message || 'Mật khẩu không đúng. Vui lòng thử lại.';
         errorElement.classList.remove('hidden');
-        document.getElementById('passwordInput').value = '';
-        document.getElementById('passwordInput').focus();
+        const input = document.getElementById('passwordInput');
+        input.value = '';
+        input.focus();
     }
 }
 
