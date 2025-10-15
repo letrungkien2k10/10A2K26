@@ -299,6 +299,12 @@ async function loadMemories() {
             `;
             const imgEl = memoryCard.querySelector('.memory-img');
             if (imgEl) imgEl.onclick = () => openImageModal(mem.url);
+            // fallback: open when clicking anywhere on card except actions
+            memoryCard.addEventListener('click', (evt) => {
+                if (evt.target.closest('.memory-action-btn')) return;
+                if (evt.target.closest('.memory-actions')) return;
+                openImageModal(mem.url);
+            });
             grid.appendChild(memoryCard);
             allMemoryElements.push(memoryCard);
         });
@@ -963,6 +969,7 @@ window.openImageModal = function(src) {
     if (modal && modalImage) {
         modalImage.src = src;
         modal.classList.remove('hidden');
+        modal.classList.add('show');
     }
 };
 
