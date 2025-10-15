@@ -17,6 +17,17 @@ const itemsPerPage = 20;
 // No results div for memories
 let noResultsDiv = null;
 
+// Safe loading state toggler to avoid runtime errors
+function showLoadingState(isLoading) {
+    try {
+        const skeleton = document.getElementById('memorySkeleton');
+        const grid = document.querySelector('.memory-grid');
+        if (skeleton) skeleton.classList.toggle('hidden', !isLoading);
+        if (grid && isLoading) grid.style.opacity = '0.6';
+        if (grid && !isLoading) grid.style.opacity = '1';
+    } catch (_) {}
+}
+
 // Input sanitization function
 function sanitizeInput(input) {
     return input.trim().replace(/[<>]/g, '');
