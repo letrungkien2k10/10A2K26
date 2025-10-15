@@ -2,7 +2,7 @@
 
 // Authentication state
 let isAuthenticated = false;
-const correctPassword = "10A2K26"; // TODO: Move to environment variable for production
+let classPassword = null; // populated after server-side auth
 
 // Rate limiting for uploads
 let lastUploadTime = 0;
@@ -138,7 +138,7 @@ function applyFilterAndSort() {
 
 // Render pagination
 function renderPagination(totalPages) {
-    const pagination = document.querySelector('.pagination');
+    const pagination = document.getElementById('pagination');
     if (!pagination) return;
 
     pagination.innerHTML = '';
@@ -209,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const authStatus = localStorage.getItem('isAuthenticated');
     isAuthenticated = authStatus === 'true';
+    classPassword = localStorage.getItem('classPassword') || null;
     
     if (isAuthenticated) {
         showMemoryActions();
@@ -270,7 +271,10 @@ async function loadMemories() {
             const memoryCard = document.createElement('div');
             memoryCard.className = 'memory-card';
             memoryCard.dataset.path = mem.path;
+            memoryCard.dataset.title = mem.title;
+            memoryCard.dataset.date = mem.date;
             memoryCard.style.display = 'none'; // Initially hidden
+            // Keep original behavior; no extra AOS attributes added here
             memoryCard.innerHTML = `
                 <img src="${mem.url}" alt="${mem.title}" class="memory-img" loading="lazy">
                 <div class="memory-overlay">
@@ -282,6 +286,8 @@ async function loadMemories() {
                     <div class="memory-action-btn delete-btn"><i data-feather="trash-2"></i></div>
                 </div>
             `;
+            const imgEl = memoryCard.querySelector('.memory-img');
+            if (imgEl) imgEl.onclick = () => openImageModal(mem.url);
             grid.appendChild(memoryCard);
             allMemoryElements.push(memoryCard);
         });
@@ -291,6 +297,8 @@ async function loadMemories() {
         // Initial filter/sort/paginate
         currentPage = 1;
         applyFilterAndSort();
+
+        // Keep original AOS init/behavior managed in index.html script
 
     } catch (err) {
         console.error('Load memories error:', err);
@@ -388,6 +396,28 @@ function closeUploadModal() {
     document.getElementById('fileName').classList.add('hidden');
 }
 
+// Save edit metadata
+async function saveEdit() {
+    const path = document.getElementById('editPath').value;
+    const title = sanitizeInput(document.getElementById('editTitle').value);
+    const date = document.getElementById('editDate').value;
+    if (!title || title.length < 3) { showErrorToast('Tiêu đề phải có ít nhất 3 ký tự!'); return; }
+    if (!date) { showErrorToast('Vui lòng chọn ngày chụp!'); return; }
+    try {
+        const resp = await fetch('/.netlify/functions/update-image-metadata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path, title, date, password: classPassword })
+        });
+        if (!resp.ok) throw new Error('Cập nhật thất bại');
+        showSuccessToast('Đã cập nhật thông tin ảnh!');
+        document.getElementById('editModal').classList.add('hidden');
+        loadMemories();
+    } catch (e) {
+        showErrorToast('Lỗi khi cập nhật!');
+    }
+}
+
 // File input display + validate size
 document.getElementById('imageFile').addEventListener('change', function(e) {
     const fileNameElement = document.getElementById('fileName');
@@ -479,6 +509,7 @@ function uploadImage() {
                     date,
                     filename: file.name,
                     contentBase64: base64,
+                    password: classPassword,
                 }),
             });
             clearInterval(progressInterval);
@@ -541,9 +572,9 @@ document.addEventListener('click', async (e) => {
         if (confirm('Bạn có chắc muốn xóa ảnh này?')) {
             try {
                 const resp = await fetch('/.netlify/functions/delete-image', {
-                    method: 'POST',
+                    method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ path })
+                    body: JSON.stringify({ path, password: classPassword })
                 });
                 if (resp.ok) {
                     showSuccessToast('Xóa ảnh thành công!');
@@ -558,8 +589,16 @@ document.addEventListener('click', async (e) => {
     }
 
     if (e.target.closest('.edit-btn')) {
-        // TODO: Implement edit functionality
-        alert('Chức năng chỉnh sửa đang được phát triển...');
+        const card = e.target.closest('.memory-card');
+        const path = card.dataset.path;
+        const title = card.dataset.title || card.querySelector('.memory-title')?.textContent || '';
+        const date = card.dataset.date || '';
+        const modal = document.getElementById('editModal');
+        document.getElementById('editPath').value = path;
+        document.getElementById('editTitle').value = title;
+        document.getElementById('editDate').value = date ? new Date(date).toISOString().slice(0,10) : '';
+        modal.classList.remove('hidden');
+        if (typeof feather !== 'undefined') feather.replace();
     }
 });
 
@@ -615,19 +654,51 @@ if (mobileMenuBtn && mobileMenu) {
     });
 }
 
-// Scroll to Top button
+// Scroll to Top/Bottom button
 const scrollTopBtn = document.getElementById('scrollTopBtn');
+const scrollProgressBar = document.getElementById('scrollProgressBar');
+
+function updateScrollProgress() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    if (scrollProgressBar) scrollProgressBar.style.width = progress + '%';
+}
 
 window.addEventListener('scroll', () => {
     if (window.scrollY > 200) {
         scrollTopBtn.classList.add('show');
+        // Show up arrow for scroll to top
+        scrollTopBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        scrollTopBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         scrollTopBtn.classList.remove('show');
+        // Show down arrow for scroll to bottom
+        scrollTopBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        scrollTopBtn.onclick = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
+    updateScrollProgress();
 });
 
-scrollTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+window.addEventListener('load', updateScrollProgress);
+
+// Subtle parallax on hero image for better scroll feeling
+const heroParallax = document.getElementById('heroParallax');
+let lastKnownScrollY = 0;
+let ticking = false;
+
+function applyParallax() {
+    const offset = lastKnownScrollY * 0.2; // slower than scroll
+    if (heroParallax) heroParallax.style.transform = 'translateY(' + (-offset) + 'px)';
+    ticking = false;
+}
+
+window.addEventListener('scroll', function() {
+    lastKnownScrollY = window.scrollY || document.documentElement.scrollTop;
+    if (!ticking) {
+        window.requestAnimationFrame(applyParallax);
+        ticking = true;
+    }
 });
 
 // Counter animation when in viewport
@@ -642,16 +713,26 @@ function animateCounter(counter) {
     }
     requestAnimationFrame(update);
 }
-function checkCounters() {
-    document.querySelectorAll('.counter').forEach(counter => {
-        const rect = counter.getBoundingClientRect();
-        if(rect.top < window.innerHeight && rect.bottom > 0 && counter.textContent === '0') {
-            animateCounter(counter);
-        }
-    });
+// Optimize counters with IntersectionObserver
+function initCountersObserver() {
+    const counters = document.querySelectorAll('.counter');
+    if (!('IntersectionObserver' in window) || counters.length === 0) {
+        // Fallback
+        counters.forEach(c => animateCounter(c));
+        return;
+    }
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const el = entry.target;
+                if (el.textContent === '0') animateCounter(el);
+                obs.unobserve(el);
+            }
+        });
+    }, { threshold: 0.4 });
+    counters.forEach(c => observer.observe(c));
 }
-window.addEventListener('scroll', checkCounters);
-window.addEventListener('load', checkCounters);
+window.addEventListener('load', initCountersObserver);
 
 // Student list generator
 const studentContainer = document.getElementById('student-container');
@@ -812,6 +893,7 @@ function renderStudentCard(student, container, index = 0) {
     card.style.order = student.order; // Set CSS order
     card.style.flex = '1 1 250px'; // Flex basis cho grid-like
     card.style.maxWidth = '300px';
+    // Keep original behavior without extra AOS attributes here
     card.onclick = (e) => {
         if (e.target.classList.contains('role-badge')) return;
         openStudentModal(student.name, student.img, roleBadges);
