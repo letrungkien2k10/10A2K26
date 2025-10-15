@@ -7,7 +7,14 @@ export async function handler(event) {
   }
 
   try {
-    const { path } = JSON.parse(event.body);
+    const { path, password } = JSON.parse(event.body || '{}');
+    const CLASS_PASSWORD = process.env.CLASS_PASSWORD;
+    if (!CLASS_PASSWORD) {
+      return { statusCode: 500, body: JSON.stringify({ error: 'Server misconfigured' }) };
+    }
+    if (password !== CLASS_PASSWORD) {
+      return { statusCode: 401, body: JSON.stringify({ error: 'Sai mật khẩu lớp!' }) };
+    }
 
     const user = process.env.GITHUB_USER;
     const repo = process.env.GITHUB_REPO;
@@ -31,7 +38,7 @@ export async function handler(event) {
     }
 
     const jsonData = await jsonRes.json();
-    let memories = JSON.parse(atob(jsonData.content));
+    let memories = JSON.parse(Buffer.from(jsonData.content, 'base64').toString('utf8'));
 
     // Remove the entry
     memories = memories.filter(m => m.path !== path);

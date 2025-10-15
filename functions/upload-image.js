@@ -67,7 +67,7 @@ export async function handler(event) {
     let jsonSha = null;
     if (jsonRes.ok) {
       const jsonData = await jsonRes.json();
-      memories = JSON.parse(atob(jsonData.content));
+      memories = JSON.parse(Buffer.from(jsonData.content, 'base64').toString('utf8'));
       jsonSha = jsonData.sha;
     }
 
@@ -110,14 +110,14 @@ export async function handler(event) {
 }
 
 exports.handler = async function(event, context) {
-  const { password, ...otherData } = JSON.parse(event.body);
-
-  if (password !== CLASS_PASSWORD) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({ error: "Sai mật khẩu lớp!" })
-    };
+  const parsed = JSON.parse(event.body || '{}');
+  const password = parsed.password;
+  const CLASS_PASSWORD = process.env.CLASS_PASSWORD;
+  if (!CLASS_PASSWORD) {
+    return { statusCode: 500, body: JSON.stringify({ error: 'Server misconfigured' }) };
   }
-
+  if (password !== CLASS_PASSWORD) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Sai mật khẩu lớp!' }) };
+  }
   return handler(event);
 };

@@ -21,7 +21,7 @@ export async function handler(event) {
             throw new Error(data.message || "Failed to fetch memories.json");
         }
 
-        const content = JSON.parse(atob(data.content));
+        const content = JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
         console.log('Fetched content:', content);
 
         return {
