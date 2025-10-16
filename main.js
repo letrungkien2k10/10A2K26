@@ -134,7 +134,9 @@ function applyFilterAndSort() {
     }
 
     // Show paginated
-    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const paginated = filtered.slice(start, end);
@@ -238,9 +240,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners for search and sort
     const searchInput = document.getElementById('searchMemory');
     const sortSelect = document.getElementById('sortMemory');
-    const debouncedFilter = debounce(applyFilterAndSort, 300);
+    const debouncedFilter = debounce(() => { currentPage = 1; applyFilterAndSort(); }, 300);
     searchInput.addEventListener('input', debouncedFilter);
-    sortSelect.addEventListener('change', applyFilterAndSort);
+    sortSelect.addEventListener('change', () => { currentPage = 1; applyFilterAndSort(); });
 });
 
 // Load memories from server
