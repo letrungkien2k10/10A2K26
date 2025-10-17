@@ -772,10 +772,10 @@ const studentContainer = document.getElementById('student-container');
 
 // Danh sách học sinh (role là mảng) - Data thực tế, thêm trường order để giữ thứ tự
 const students = [
-    { name: 'Vũ Kim Huệ', role: ['monitor'], img: 'img/hue.jpg', order: 0 },
+    { name: 'Nguyễn Thị Thân Thương', role: ['monitor'], img: 'img/thuong.jpg', order: 0 },
     { name: 'Nguyễn Thu Hà', role: ['secretary'], img: 'img/hoangquocvuong.jpg', order: 1 },
     { name: 'Nguyễn Xuân Hưng', role: ['studying'], img: 'img/hoangquocvuong.jpg', order: 2 },
-    { name: 'Nguyễn Đức Lĩnh', role: ['studying'], img: 'img/hoangquocvuong.jpg', order: 3 },
+    { name: 'Nguyễn Đức Lĩnh', role: ['studying'], img: 'img/lĩnh.jpg', order: 3 },
     { name: 'Phạm Hà Vy', role: ['deputy-labor'], img: 'img/hoangquocvuong.jpg', order: 4 },
     { name: 'Nguyễn Duy Anh', role: ['group-leader-1'], img: 'img/hoangquocvuong.jpg', order: 5 },
     { name: 'Nguyễn Khánh Hưng', role: ['group-leader-2'], img: 'img/hoangquocvuong.jpg', order: 6 },
@@ -811,10 +811,10 @@ const students = [
     { name: 'Vũ Bảo Ngọc', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 36 },
     { name: 'Phạm Công Sơn', role: ['member'], img: 'img/hoangquocvuong.jpg', order: 37 },
     { name: 'Nguyễn Thanh Thảo', role: ['member'], img: 'img/thanhthao.jpg', order: 38 },
-    { name: 'Nguyễn Thị Thân Thương', role: ['member'], img: 'img/thuong.jpg', order: 39 },
+    { name: 'Vũ Kim Huệ', role: ['member'], img: 'img/hue.jpg', order: 39 },
     { name: 'Hoàng Mạnh Tiến', role: ['member'], img: 'img/tien.jpg', order: 40 },
     { name: 'Nguyễn Thu Trang', role: ['member'], img: 'img/trang.jpg', order: 41 },
-    { name: 'Nguyễn Thanh Tuyển', role: ['member'], img: 'img/tuyen.jpg', order: 42 },
+    { name: 'Nguyễn Thanh Tuyền', role: ['member'], img: 'img/tuyen.jpg', order: 42 },
     { name: 'Đỗ Thy', role: ['member'], img: 'img/thy.jpg', order: 43 },
     { name: 'Lưu Phương Vy', role: ['member'], img: 'img/phuongvy.jpg', order: 44 }
 ];
