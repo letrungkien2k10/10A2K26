@@ -27,6 +27,7 @@ GITHUB_USER=your-github-username
 GITHUB_REPO=your-repo-name
 GITHUB_TOKEN=your-github-token
 GITHUB_BRANCH=main
+CLASS_PASSWORD=your-password
 ```
 
 ### GitHub Token Permissions
@@ -98,4 +99,5 @@ Nếu gặp vấn đề, vui lòng liên hệ:
 
 ### Lỗi Filter/Search
 - Tìm kiếm chỉ áp dụng trên trang hiện tại: Đã fix bằng client-side pagination.
+
 - Không có kết quả: Hiển thị message "Không tìm thấy".
